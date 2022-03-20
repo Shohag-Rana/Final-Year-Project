@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block link %}
+{{block.super}}
+      <!-- <link rel="stylesheet" type="text/css" href="{% static 'css/style1.css' %}"> -->
+{% endblock link %}
+    
+   
+{% block title %}{{block.super}} Login {% endblock title %} 
+
+ {% block content1 %}
+ {% endblock content1 %}
+ 
+{% block content2 %}
+<div class="container">
+  <div class="row">
+    <div class="col-2"></div>
+    <div class="col-8">
+      <h4 class="text-center p-3">Log In</h4>
+      <form method="POST" action="" enctype="multipart/form-data" novalidate >
+      {% csrf_token %}
+        {% if form %}
+          {% for field in form %} 
+            <div class="form-group mt-2">
+              {{field.label_tag}} {{field}} <p style="color: red">{{field.errors|striptags}}</p>
+            </div> 
+          {% endfor %}
+        {% endif %}
+      <input type="submit" class="btn btn-info btn-block w-100">
+    </form>
+    <br>
+    <p class="text-lead text-muted">If you don'y have an account please <a href="{% url 'signup' %}">Create an Account</a> </p>
+    <p class="text-lead text-muted">Forget your Password ? then <a href="{% url 'password_reset' %}">Reset Here</a> </p>
+     
+    </div>
+    <div class="col-2"></div>
+  </div>
+   
+</div>
+  
+
+  
+
+{% endblock content2 %}
+{% block script %}
+  {{block.super}}
+{% endblock script %}
+  
+  </body>
+</html>

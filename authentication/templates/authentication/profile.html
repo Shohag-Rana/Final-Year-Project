@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block link %}
+{{block.super}}
+      {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/profile.css' %}"> {% endcomment %}
+{% endblock link %}
+    
+   
+{% block title %}{{block.super}} Dashboard {% endblock title %} 
+ {% block content1 %}
+ {% endblock content1 %}
+{% block content2 %}
+<div class="container">
+   <div class="row">
+     <div class="col-3">
+       <div class="box1">
+         <div>
+           <img src="{{user.profile_pic.url}}" class="pro_img">
+         </div>
+         <h2 class="text-center text-white txt1">{{request.user}}</h2>
+         <ul>
+           <li><a href="">Create Post</a></li>
+           <li><a href="">Delete Post</a></li>
+           <li><a href="">Update Post</a></li>
+           <li><a href="">View Post</a></li>
+         </ul>
+       </div>
+     </div>
+     <div class="col-7"></div>
+     <div class="col-2"></div>
+   </div>
+</div>
+  
+
+{% endblock content2 %}
+{% block script %}
+  {{block.super}}
+{% endblock script %}
+  
+  </body>
+</html>
+
+ 

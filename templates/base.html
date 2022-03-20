@@ -1,0 +1,66 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block link %}
+      {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'css/style1.css' %}"> {% endcomment %}
+    {% endblock link %}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/fontawesome.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.css' %}">
+   
+    <title>{% block title %}MBSTU| {% endblock title %}</title>
+  </head>
+  <body>
+<!-- Navigation Menu -->
+    {% include 'navbar.html' %}
+ 
+ {% block content1 %}
+  <div class="jumbotron jumbotron-fluid text-center pt-3">
+    <div class="container">
+      <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>
+      <hr class="my-4">
+      <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>
+      <p class="lead">
+        <a class="btn btn-primary btn-lg" href="#" role="button">Go to News Feeds</a>
+      </p>
+    </div>
+  </div>
+ {% endblock content1 %}
+
+
+ {% block content2 %}
+
+ {% endblock content2 %}
+
+
+ {% block content3 %}
+
+ {% endblock content3 %}
+
+
+ {% block content4 %}
+
+ {% endblock content4 %}
+
+ {% block footer %}
+  <div class="footer">
+    <p class="text-white text-center">Copyright &copy; Md. Shohag Rana</p>
+  </div>
+ {% endblock footer %}
+
+{% block script %}
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/popper.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/fontawesome.js' %}"></script>
+{% endblock script %}
+  </body>
+
+</html>
