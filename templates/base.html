@@ -46,11 +46,9 @@
 
  {% endblock content4 %}
 
- {% block footer %}
-  <div class="footer">
-    <p class="text-white text-center">Copyright &copy; Md. Shohag Rana</p>
-  </div>
- {% endblock footer %}
+  {% block footer %}
+    {% include 'footer.html' %}
+  {% endblock footer %}
 
 {% block script %}
   <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
@@ -60,6 +58,7 @@
   <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/popper.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/fontawesome.js' %}"></script>
+  
 {% endblock script %}
   </body>
 

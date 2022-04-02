@@ -4,14 +4,15 @@ from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, 
 
  
 urlpatterns = [
-    path('signup/', views.user_signup, name= "signup"), 
+    path('student_signup/', views.student_signup, name= "student_signup"), 
     path('login/', views.user_login, name= "login"),
     path('logout/', views.user_logout, name= "logout"),
-    path('pswreset/', views.user_password_reset, name= 'pswreset'),
-   	path('pswreset2/', views.user_password_reset2, name= 'pswreset2'),
-    path('dashboard/', views.user_dashboard, name= "dashboard"),
+   	path('gmail/', views.check_mail, name= 'mail'),
+    path('teacher_signup/', views.teacher_signup, name= "teacher_signup"),
+    path('office_stuff_signup/', views.office_stuff_signup, name= "office_stuff_signup"),
+    
 
-    # email verification
+#     # email verification
     path('activate/<uidb64>/<token>/', views.activate, name= "activate"),
     path('reset/password/', PasswordResetView.as_view(template_name = 'authentication/resetpassword.html'), name='password_reset'),
     path('reset/password/done/', PasswordResetDoneView.as_view(template_name = 'authentication/reset_password_done.html'), name='password_reset_done'),

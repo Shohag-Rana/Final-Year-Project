@@ -1,6 +1,7 @@
+from urllib import request
 from django.shortcuts import render, HttpResponseRedirect
-from . models import Student
-from . forms import StudentRegForm, LoginForm
+from . models import Student, Teacher, Teacher_email, UserManager, OfficeStuff
+from . forms import StudentRegForm, LoginForm, TeacherRegForm, OfficeStuffRegForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -10,54 +11,58 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.models import Group
-from django.contrib.auth.models import User
+from . models import User
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm, UserChangeForm
-
 user_model = get_user_model()
-# Create your views here.
 
-#signup
-def user_signup(request):
-    if request.method == "POST":
-        print('this is post req.')
-        fm = StudentRegForm(request.POST, request.FILES)
-        if fm.is_valid():
-            username = fm.cleaned_data['username']
-            first_name = fm.cleaned_data['first_name']
-            last_name = fm.cleaned_data['last_name']
-            dept = fm.cleaned_data['dept']
-            email = fm.cleaned_data['email']
-            session = fm.cleaned_data['session']
-            student_id = fm.cleaned_data['student_id']
-            home_town = fm.cleaned_data['home_town']
-            hall = fm.cleaned_data['hall']
-            profile_image = fm.cleaned_data['profile_image']
-            user = fm.save(commit = False)
-            user.is_active = False
-            user.save()
-            current_site = get_current_site(request)
-            mail_subject = 'Activate your account'
-            message = render_to_string('authentication/account.html', {
-                'user': user,
-                'domain': current_site.domain,
-                'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                'token': default_token_generator.make_token(user),
+# # signup
+
+
+def student_signup(request):
+    if not request.user.is_authenticated:
+        if request.method == "POST":
+            fm = StudentRegForm(request.POST, request.FILES)
+            if fm.is_valid():
+                email = fm.cleaned_data['email']
+                student_id = fm.cleaned_data['student_id']
+                if (email[0] != 'c' and email[1] != 'e' and email[7] != '@' and email[8] != 'm' and email[9] != 'b' and email[10] != 's' and email[11] != 't' and email[12] != 'u'):
+                    messages.warning(
+                        request, 'Please enter the valid email addres return')
+                    return HttpResponseRedirect('/auth/student_signup/')
+
+                if (student_id[0] != 'C' and student_id[1] != 'E'):
+                    messages.info(request, 'Please enter the valid student id')
+                    return HttpResponseRedirect('/auth/student_signup/')
+                user = fm.save(commit=False)
+                user.is_active = False
+                user.save()
+                current_site = get_current_site(request)
+                mail_subject = 'Activate your account'
+                message = render_to_string('authentication/account.html', {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': default_token_generator.make_token(user),
                 })
-            send_mail = fm.cleaned_data.get('email')
-            email = EmailMessage(mail_subject, message, to=[send_mail])
-            email.send()
-            messages.success(request, 'Successfully created account')
-            messages.success(request, 'Activate your account from email')
-
+                send_mail = fm.cleaned_data.get('email')
+                email = EmailMessage(mail_subject, message, to=[send_mail])
+                email.send()
+                messages.success(request, 'Successfully created account')
+                messages.success(request, 'Activate your account from email')
+                return HttpResponseRedirect('/auth/gmail/')
+        else:
+            fm = StudentRegForm()
+        return render(request, 'authentication/student_signup.html', {'form': fm})
     else:
-        fm = StudentRegForm()
-    return render(request, 'authentication/signup.html', {'form': fm})
+        return HttpResponseRedirect('/')
 
-# activate your account
+# # activate your account
+
+
 def activate(request, uidb64, token):
     try:
         uid = urlsafe_base64_decode(uidb64).decode()
-        user = user_model._default_manager.get(pk= uid)
+        user = user_model._default_manager.get(pk=uid)
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
 
@@ -68,73 +73,147 @@ def activate(request, uidb64, token):
         return HttpResponseRedirect('/auth/login/')
     else:
         messages.warning(request, 'activation link is invalid')
-        return HttpResponseRedirect('/auth/signup/')
+        return HttpResponseRedirect('/')
 
-#login
+# login
+
+
 def user_login(request):
     if not request.user.is_authenticated:
         if request.method == "POST":
-            fm = LoginForm(request=request, data=request.POST)
+            fm = LoginForm(data=request.POST)
             if fm.is_valid():
-                nm = fm.cleaned_data['username']
+                mail = fm.cleaned_data['email']
                 psw = fm.cleaned_data['password']
-                user = authenticate(username=nm, password=psw)
+                user = authenticate(email=mail, password=psw)
                 if user is not None:
                     login(request, user)
-                    messages.success(request, 'User Login Successfully!!')
-                    return HttpResponseRedirect('/auth/dashboard/')
+                    messages.success(request, 'Login Successfull!!')
+                    if user.is_admin:
+                        return HttpResponseRedirect('/chairman/profile/')
+                    teacher = Teacher.objects.filter(email=mail)
+                    for t in teacher:
+                        return HttpResponseRedirect('/faculty/profile/')
+                    
+                    student = Student.objects.filter(email=mail)
+                    for s in student:
+                        return HttpResponseRedirect('/student/profile/')
+
+                    office = OfficeStuff.objects.filter(email=mail)
+                    for s in office:
+                        return HttpResponseRedirect('/stuff/profile/')
                 else:
                     messages.error(request, 'wrong user enter correct one')
                     fm = LoginForm()
                     return render(request, 'authentication/login.html', {'form': fm})
+            else:
+                messages.warning(request, 'wrong user!!!!!!!!!!!!')
+                return HttpResponseRedirect('/auth/login/')
         else:
             fm = LoginForm()
         return render(request, 'authentication/login.html', {'form': fm})
     else:
-        return HttpResponseRedirect('/auth/dashboard/')
+        return HttpResponseRedirect('/')
 
-#logout
+# logout
+
+
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/auth/login/')
 
-def user_dashboard(request):
-    if request.user.is_authenticated:
-        print(request.user.id)
-        user = User.objects.get(pk= request.user.id)
-        print(user)
-        return render(request, 'authentication/profile.html', {'user': user})
-    else:
-        return HttpResponseRedirect('/auth/signup/')
 
-def user_password_reset(request):
+# def course_registration(request, semester_no="1st Year 1st Semester"):
+#     if request.user.is_authenticated:
+#         user = Student.objects.get(id=request.user.id)
+#         regular_courses = Course.objects.filter(semister_no=semester_no)
+#         course_name = []
+#         if request.method == 'POST':
+#             for courseName in regular_courses:
+#                 course_name.append(courseName.course_code)
+#             studentId = user.student_id
+#             studentName = user.username
+#             courses = course_name
+#             session = user.session
+#             data = CourseRegistration(
+#                 studentId=studentId, studentName=studentName, courses=courses, session=session)
+#             data.save()
+#             messages.success(request, "Course Registration Successfull!!!")
+#         return render(request, 'authentication/profile.html', {'user': user, 'regular_courses': regular_courses})
+#     else:
+#         return HttpResponseRedirect('/auth/login/')
 
-    if request.user.is_authenticated:
-        fm = PasswordChangeForm(request.user)
+
+def check_mail(request):
+    return render(request, 'authentication/gmailMessage.html')
+
+
+def teacher_signup(request):
+    if not request.user.is_authenticated:
         if request.method == 'POST':
-            fm = PasswordChangeForm(user = request.user, data = request.POST)
-            if fm.is_valid():
-                fm.save()
-                messages.success(request, 'Password change successfully...')
-                update_session_auth_hash(request, fm.user)
-                return HttpResponseRedirect('/auth/dashboard/')
-        else:
-            fm = PasswordChangeForm(request.user)
-        return render(request, 'authentication/pswreset1.html', {'form': fm})
+            form = TeacherRegForm(request.POST, request.FILES)
+            if form.is_valid():
+                mail = form.cleaned_data['email']
+                flag = False
+                for m in Teacher_email.objects.all():
+                    if m.email == mail:
+                        flag = True
+                        break
+                if flag == True:
+                    
+                    user = form.save(commit=False)
+                    user.is_active = False
+                    user.save()
+                    current_site = get_current_site(request)
+                    mail_subject = 'Activate your account'
+                    message = render_to_string('authentication/account.html', {
+                        'user': user,
+                        'domain': current_site.domain,
+                        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                        'token': default_token_generator.make_token(user),
+                    })
+                    send_mail = form.cleaned_data.get('email')
+                    email = EmailMessage(mail_subject, message, to=[send_mail])
+                    email.send()
+                    messages.success(request, 'Successfully created account')
+                    messages.success(request, 'Activate your account from email')
+                    return HttpResponseRedirect('/auth/login/')
+                    
+            else:
+                messages.info(request, 'Enter the correct value!!!')
+        form = TeacherRegForm()
+        return render(request, 'authentication/teacher_signup.html', {'form': form})
     else:
-        return HttpResponseRedirect('/auth/login/') 
+        return HttpResponseRedirect('/')
 
-def user_password_reset2(request):
-    if request.user.is_authenticated:
+
+def office_stuff_signup(request):
+    if not request.user.is_authenticated:
         if request.method == 'POST':
-            fm = SetPasswordForm(user= request.user, data= request.POST)
-            if fm.is_valid():
-                fm.save()
-                messages.success(request, 'Password change successfully...')
-                update_session_auth_hash(request, fm.user)
-                return HttpResponseRedirect('/auth/dashboard/')
-        else:
-            fm = SetPasswordForm(request.user)
-        return render(request, 'authentication/pswreset2.html', {'form': fm})
-    else:
-        return HttpResponseRedirect('/auth/login/')
+            form = OfficeStuffRegForm(request.POST, request.FILES)
+            if form.is_valid():
+                user = form.save(commit=False)
+                user.is_active = False
+                user.save()
+                current_site = get_current_site(request)
+                mail_subject = 'Activate your account'
+                message = render_to_string('authentication/account.html', {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': default_token_generator.make_token(user),
+                })
+                send_mail = form.cleaned_data.get('email')
+                email = EmailMessage(mail_subject, message, to=[send_mail])
+                email.send()
+                messages.success(request, 'Successfully created account')
+                messages.success(request, 'Activate your account from email')
+                return HttpResponseRedirect('/auth/gmail/')
+                    
+            else:
+                messages.info(request, 'Enter the correct value!!!')
+        form = OfficeStuffRegForm()
+        return render(request, 'authentication/officestuff_signup.html', {'form': form})
+    return HttpResponseRedirect('/')
+
+    

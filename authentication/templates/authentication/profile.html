@@ -2,36 +2,53 @@
 {% load static %}
 
 {% block link %}
-{{block.super}}
-      {% comment %} <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/profile.css' %}"> {% endcomment %}
+    <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/profile.css' %}">
 {% endblock link %}
     
    
 {% block title %}{{block.super}} Dashboard {% endblock title %} 
- {% block content1 %}
- {% endblock content1 %}
+{% block content1 %}
+  <div class="container">
+    {% if messages %}
+      {{message}}
+    {% endif %}
+    <div class="row">
+      <div class="col-4">
+        {% include 'authentication/profileSidebar.html' %}
+      </div>
+      <div class="col-8">
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '1st Year 1st Semester' %}>1-1</a>
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '1st Year 2nd Semester' %}>1-2</a>
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '2nd Year 1st Semester' %}>2-1</a>
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '2nd Year 2nd Semester' %}>2-2</a>
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '3rd Year 1st Semester' %}>3-1</a>
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '3rd Year 2nd Semester' %}>3-2</a>
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '4th Year 1st Semester' %}>4-1</a>
+        <a type="button" class="btn btn-danger course_reg_button" href={% url 'course_registration' '4th Year 2nd Semester' %}>4-2</a>
+        {% if regular_courses %}
+        <form method="POST" action="" enctype="multipart/form-data" novalidate >
+          <div class="row">
+            <h2 class="text-center text-warning m-3">Regular Course</h2>
+              {% csrf_token %}
+                {% for course in regular_courses %} 
+                    <div class="col-6">
+                      <div class="form-group mt-2">
+                        <input type="text" name='{{course.course_name}}' class="form-control" value='{{course.course_code}}' disabled>
+                      </div>
+                    </div>
+                {% endfor %}
+                <input type="submit" class="btn btn-danger mt-2 btn-block w-100">
+          </div>
+        </form>
+        {% else %}
+          <h2 class="text-center text-danger m-5">No Courses Available</h2>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock content1 %}
+ 
 {% block content2 %}
-<div class="container">
-   <div class="row">
-     <div class="col-3">
-       <div class="box1">
-         <div>
-           <img src="{{user.profile_pic.url}}" class="pro_img">
-         </div>
-         <h2 class="text-center text-white txt1">{{request.user}}</h2>
-         <ul>
-           <li><a href="">Create Post</a></li>
-           <li><a href="">Delete Post</a></li>
-           <li><a href="">Update Post</a></li>
-           <li><a href="">View Post</a></li>
-         </ul>
-       </div>
-     </div>
-     <div class="col-7"></div>
-     <div class="col-2"></div>
-   </div>
-</div>
-  
 
 {% endblock content2 %}
 {% block script %}

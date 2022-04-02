@@ -1,0 +1,83 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">StudentDashboard</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item  dropdown">
+          <a
+            class="nav-link dropdown-toggle active"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+           {{ request.user.first_name }} {{request.user.last_name}}
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href={% url 'student_pswreset' %}>Change Password with old password</a><div class="dropdown-divider"></div>
+            <a class="dropdown-item" href={% url 'student_pswreset2' %}>Change Password with out old psw</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="/student/profile/">Profile</a>
+          </div>
+        </li>
+        <li class="nav-item  dropdown">
+          <a
+            class="nav-link dropdown-toggle active"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+           Courses
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Current Courses</a><div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Complete Courses</a><div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Backlog Courses</a>
+             
+          </div>
+        </li>
+        <li class="nav-item  dropdown">
+          <a
+            class="nav-link dropdown-toggle active"
+            href="#"
+            id="navbarDropdown"
+            role="button"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+           Semester
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="#">Current Semester</a><div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Complete Semester</a><div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Incomplete Semester</a>
+             
+          </div>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Result</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href={% url 'student_logout' %}>LogOut</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>

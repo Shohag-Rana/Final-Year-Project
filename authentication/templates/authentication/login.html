@@ -10,6 +10,21 @@
 {% block title %}{{block.super}} Login {% endblock title %} 
 
  {% block content1 %}
+ <div class="container">
+  <div class="row">
+      <div class="col-2"></div>
+      <div class="col-8">
+          {% if messages %}
+          {% for message in messages %}
+          <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+          <strong>{{message.tags}}</strong> {{message}}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+          {% endif %}
+      </div>
+  </div>
+</div>
  {% endblock content1 %}
  
 {% block content2 %}
@@ -27,10 +42,10 @@
             </div> 
           {% endfor %}
         {% endif %}
-      <input type="submit" class="btn btn-info btn-block w-100">
+      <input type="submit" class="btn btn-info btn-block my-2 w-100">
     </form>
     <br>
-    <p class="text-lead text-muted">If you don'y have an account please <a href="{% url 'signup' %}">Create an Account</a> </p>
+    <p class="text-lead text-muted">If you don'y have an account please <a href="">Create an Account</a> </p>
     <p class="text-lead text-muted">Forget your Password ? then <a href="{% url 'password_reset' %}">Reset Here</a> </p>
      
     </div>

@@ -1,0 +1,86 @@
+{% extends 'admin_base.html' %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+{% load static %}
+
+{% block link %}
+  <link rel="stylesheet" type="text/css" href="{% static 'chairman/css/teacher_list.css' %}">
+{% endblock link %}
+    
+   
+{% block title %}{{block.super}} | Teacher List {% endblock title %} 
+
+ {% block content1 %}
+    <div class="container">
+        <div class="row">
+            <div class="col-2"></div>
+            <div class="col-8">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+                <strong>{{message.tags}}</strong> {{message}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+ {% endblock content1 %}
+ 
+{% block content2 %}
+<div class="container">
+  <h1 class="text-center text-warning m-4">Faculty Members</h1>
+  <div class="row">
+      {% for teacher in teachers %}
+        <div class="col-4 mt-5">
+            <div class="card" style="width: 21rem; height: 700px">
+
+                <div class="col-4 layout">
+                  <div class="box1">
+                    <div class="image">
+                      <img src={{teacher.profile_img.url}} height="300" style="width: 21rem">
+                    </div>
+                    <div class="contents">
+                      <h4 class="head-1">{{teacher.first_name}} {{teacher.last_name}}</h4>
+                        <p style="font-size: 25px; color: white;">{{teacher.position}}<b></b></p>
+                        <p class="icon">
+                          <span class="mr-3"><i class="fab fa-facebook-square fa-2x"></i></span>
+                          <span class="mr-3"><i class="fab fa-twitter-square fa-2x"></i></span>
+                          <span class="mr-3"><i class="fab fa-youtube-square fa-2x"></i></span>
+                          <span class="mr-3"><i class="fab fa-pinterest-square fa-2x"></i></span>
+                          <span><i class="fab fa-instagram fa-2x"></i></span>
+                        </p>
+                    </div>
+				          </div>
+			</div>
+                
+                
+                
+                <div class="card-body mt-3" style="width: 21rem; height:450px">
+                  <h5 class="card-title text-center mb-4">{{teacher.first_name}} {{teacher.last_name}}</h5>
+                  <h6><b>Interested Field</b></h6>
+                   <p style="text-align: justify"><b>{{teacher.interested_field}}</b></p>
+                </div>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item"><b style="margin-right: 14px"> Mobile:</b>{{teacher.mobile_number}}</li>
+                  <li class="list-group-item"><b style="margin-right: 14px">Email:</b> {{teacher.email}}</li>
+                </ul>
+                <div class="card-body delup-btn">
+                  <a href="#" type="button" class="card-link btn btn-danger">Delete</a>
+                  <a href="#" type="button" class="card-link btn btn-danger" style="float: right;">Update</a>
+                </div>
+              </div>
+        </div>  
+      {% endfor %}
+     </div>
+</div>
+{% endblock content2 %}
+
+
+{% block script %}
+  {{block.super}}
+{% endblock script %}
+  
+  </body>
+</html>

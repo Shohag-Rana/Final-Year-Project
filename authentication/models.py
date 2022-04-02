@@ -1,7 +1,85 @@
+from multiprocessing import managers
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import (
+    BaseUserManager, AbstractBaseUser
+)
 
-# Create your models here.
+# user managers
+class UserManager(BaseUserManager):
+    def create_user(self, email, name, tc, password=None, password2=None):
+        """
+        Creates and saves a User with the given email, name tc and password of
+        birth and password.
+        """
+        if not email:
+            raise ValueError('Users must have an email address')
+
+        user = self.model(
+            email=self.normalize_email(email),
+            name= name,
+            tc= tc,
+        )
+
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self,  email, name, tc, password=None):
+        """
+        Creates and saves a superuser with the given email, date of
+        birth and password.
+        """
+        user = self.create_user(
+            email,
+            password=password,
+            name=name,
+            tc=tc,
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+# custom user model
+class User(AbstractBaseUser):
+    email = models.EmailField(
+        verbose_name='Email',
+        max_length=255,
+        unique=True,
+    )
+    name = models.CharField(max_length= 200)
+    first_name = models.CharField(max_length= 200, default="Unknown")
+    last_name = models.CharField(max_length= 200, default="User")
+    tc = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now= True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'tc']
+
+    def __str__(self):
+        return self.email
+
+    def has_perm(self, perm, obj=None):
+        "Does the user have a specific permission?"
+        # Simplest possible answer: Yes, always
+        return self.is_admin
+
+    def has_module_perms(self, app_label):
+        "Does the user have permissions to view the app `app_label`?"
+        # Simplest possible answer: Yes, always
+        return True
+
+    @property
+    def is_staff(self):
+        "Is the user a member of staff?"
+        # Simplest possible answer: All admins are staff
+        return self.is_admin
+
+
 session_list = (
     ('2012-13','2012-13'),
     ('2013-14','2013-14'),
@@ -20,24 +98,7 @@ hall_name = (
     ('AKH', 'AKH'),
     ('BSFH', 'BSFH'),
 )
-departmentName=(
-    ('CSE','CSE'),
-    ('ICT','ICT'),
-    ('TE','TE'),
-    ('ME','ME'),
-    ('ECO','ECO'),
-    ('ENG','ENG'),
-    ('BBA','BBA'),
-    ('PHA','PHA'),
-    ('BGE','BGE'),
-    ('BMB','BMB'),
-    ('CPS','CPS'),
-    ('ESRM','ESRM'),
-    ('CHEM','CHEM'),
-    ('PHY', 'PHY'),
-    ('MATH', 'MATH'),
-    ('STAT', 'STAT'),
-)
+
 class Student(User):
     session = models.CharField(
         choices= session_list,
@@ -45,15 +106,70 @@ class Student(User):
         default='2016-17',
     )
     student_id = models.CharField(max_length=10)
-    home_town = models.CharField(max_length= 200)
     profile_image = models.ImageField(upload_to= "profileImage") 
     hall = models.CharField(
         max_length= 120,
         choices= hall_name,
         default= 'JAMH',
     )
-    dept = models.CharField(
-        max_length= 120,
-        choices= departmentName,
-        default= 'CSE',
-    )
+    user_type = models.CharField(max_length= 100, default="student")
+
+
+class Teacher(User):
+    profile_img = models.ImageField(upload_to= "profileImage") 
+    position = models.CharField(max_length=100)
+    interested_field = models.CharField(max_length= 1500)
+    mobile_number = models.CharField(max_length=100, default='Not Interested')
+    user_type = models.CharField(max_length= 100, default="teacher")
+
+    def __str__(self):
+        return self.first_name + " "+ self.last_name
+
+class Teacher_email(models.Model):
+    email = models.EmailField(max_length=150, unique=True)
+
+class OfficeStuff(User):
+    profile_img = models.ImageField(upload_to= "profileImage") 
+    position = models.CharField(max_length=100)
+    mobile_number = models.CharField(max_length=100, default='Not Interested')
+    user_type = models.CharField(max_length= 100, default="stuff")
+
+# semister = (
+#     ('1st Year 1st Semester', '1st Year 1st Semester'),
+#     ('1st Year 2nd Semester', '1st Year 2nd Semester'),
+#     ('2nd Year 1st Semester', '2nd Year 1st Semester'),
+#     ('2nd Year 2nd Semester', '2nd Year 2nd Semester'),
+#     ('3rd Year 1st Semester', '3rd Year 1st Semester'),
+#     ('3rd Year 2nd Semester', '3rd Year 2nd Semester'),
+#     ('4th Year 1st Semester', '4th Year 1st Semester'),
+#     ('4th Year 2nd Semester', '4th Year 2nd Semester'),
+# )
+# course_types = (
+#     ('Theory', 'Theory'),
+#     ('Lab', 'Lab'),
+# )
+
+
+# class Course(models.Model):
+#     course_name = models.CharField(max_length=150)
+#     course_code = models.CharField(max_length=150)
+#     course_type = models.CharField(
+#         max_length=200,
+#         choices= course_types,
+#         default= 'Theory'
+#         )
+#     credit = models.FloatField()
+#     semister_no = models.CharField(
+#         max_length=200,
+#         choices= semister,
+#         default= '1st Year 1st Semester'
+#         )
+#     course_teacher = models.CharField(max_length=200)
+
+# class CourseRegistration(models.Model):
+#     studentId = models.CharField(max_length=100)
+#     studentName = models.CharField(max_length= 200)
+#     courses = models.CharField(max_length= 1000)
+#     session = models.CharField(max_length=100)
+#     examine = models.CharField(max_length= 100, default="Md. Hadifur Rahman")
+#     remarks = models.BooleanField(default= False)
