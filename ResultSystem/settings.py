@@ -14,9 +14,9 @@ STATIC_DIRS = os.path.join(BASE_DIR, 'static')
 SECRET_KEY = 'django-insecure-@u%=v$siv2)^wwrfsptf*4sp)$g6b#0pta=!7vq4vefb^9!&&e'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["finalyearproject42.herokuapp.com", "localhost"]
 
 
 INSTALLED_APPS = [
@@ -39,6 +39,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
