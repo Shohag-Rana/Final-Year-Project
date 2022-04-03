@@ -33,23 +33,23 @@ def student_signup(request):
                 if (student_id[0] != 'C' and student_id[1] != 'E'):
                     messages.info(request, 'Please enter the valid student id')
                     return HttpResponseRedirect('/auth/student_signup/')
-                user = fm.save(commit=False)
-                user.is_active = False
-                user.save()
-                current_site = get_current_site(request)
-                mail_subject = 'Activate your account'
-                message = render_to_string('authentication/account.html', {
-                    'user': user,
-                    'domain': current_site.domain,
-                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                    'token': default_token_generator.make_token(user),
-                })
-                send_mail = fm.cleaned_data.get('email')
-                email = EmailMessage(mail_subject, message, to=[send_mail])
-                email.send()
+                # user = fm.save(commit=False)
+                # user.is_active = False
+                # user.save()
+                # current_site = get_current_site(request)
+                # mail_subject = 'Activate your account'
+                # message = render_to_string('authentication/account.html', {
+                #     'user': user,
+                #     'domain': current_site.domain,
+                #     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                #     'token': default_token_generator.make_token(user),
+                # })
+                # send_mail = fm.cleaned_data.get('email')
+                # email = EmailMessage(mail_subject, message, to=[send_mail])
+                # email.send()
                 messages.success(request, 'Successfully created account')
                 messages.success(request, 'Activate your account from email')
-                return HttpResponseRedirect('/auth/gmail/')
+                return HttpResponseRedirect('/auth/login/')
         else:
             fm = StudentRegForm()
         return render(request, 'authentication/student_signup.html', {'form': fm})
