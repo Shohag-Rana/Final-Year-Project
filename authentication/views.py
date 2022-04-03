@@ -47,6 +47,7 @@ def student_signup(request):
                 # send_mail = fm.cleaned_data.get('email')
                 # email = EmailMessage(mail_subject, message, to=[send_mail])
                 # email.send()
+                fm.save()
                 messages.success(request, 'Successfully created account')
                 messages.success(request, 'Activate your account from email')
                 return HttpResponseRedirect('/auth/login/')
