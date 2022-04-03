@@ -94,7 +94,7 @@ class StudentRegForm(UserCreationForm):
             'session': forms.Select(attrs={'class': 'form-control'}),
             'student_id': forms.TextInput(attrs={'class': 'form-control'}),
             'hall': forms.Select(attrs={'class': 'form-control'}),
-            'profile_image': forms.FileInput(attrs={'class': 'form-control'}),
+            'profile_image': forms.URLInput(attrs={'class': 'form-control'}),
         }
     
 class LoginForm(forms.Form):
@@ -148,7 +148,7 @@ class TeacherRegForm(UserCreationForm):
             'mobile_number': forms.TextInput(attrs={'class': 'form-control'}),
             'interested_field': forms.TextInput(attrs={'class': 'form-control', 'id':'interst_field'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'profile_img': forms.FileInput(attrs={'class': 'form-control'}),
+            'profile_img': forms.URLInput(attrs={'class': 'form-control'}),
         }
 
 class OfficeStuffRegForm(UserCreationForm):
@@ -173,6 +173,6 @@ class OfficeStuffRegForm(UserCreationForm):
             'position': forms.TextInput(attrs={'class': 'form-control'}),
             'mobile_number': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'profile_img': forms.FileInput(attrs={'class': 'form-control'}),
+            'profile_img': forms.URLInput(attrs={'class': 'form-control'}),
         }
 

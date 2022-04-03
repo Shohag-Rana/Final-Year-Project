@@ -106,7 +106,7 @@ class Student(User):
         default='2016-17',
     )
     student_id = models.CharField(max_length=10)
-    profile_image = models.ImageField(upload_to= "profileImage") 
+    profile_image = models.URLField(default="https://i.ibb.co/S5cx8vv/R-1.jpg") 
     hall = models.CharField(
         max_length= 120,
         choices= hall_name,
@@ -116,7 +116,7 @@ class Student(User):
 
 
 class Teacher(User):
-    profile_img = models.ImageField(upload_to= "profileImage") 
+    profile_img = models.URLField(default="https://i.ibb.co/S5cx8vv/R-1.jpg") 
     position = models.CharField(max_length=100)
     interested_field = models.CharField(max_length= 1500)
     mobile_number = models.CharField(max_length=100, default='Not Interested')
@@ -129,7 +129,7 @@ class Teacher_email(models.Model):
     email = models.EmailField(max_length=150, unique=True)
 
 class OfficeStuff(User):
-    profile_img = models.ImageField(upload_to= "profileImage") 
+    profile_img = models.URLField(default="https://i.ibb.co/S5cx8vv/R-1.jpg")  
     position = models.CharField(max_length=100)
     mobile_number = models.CharField(max_length=100, default='Not Interested')
     user_type = models.CharField(max_length= 100, default="stuff")

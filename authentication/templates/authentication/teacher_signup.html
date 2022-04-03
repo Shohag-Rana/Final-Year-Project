@@ -2,11 +2,16 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block link %}
-    <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/teacher_signup.css' %}">
-{% endblock link %}
+{% block mystyle %}
+ul{
+  list-style-type: none;
+}
+li{
+  display: inline;
+  margin-right: 10px;
+}
+{% endblock mystyle%}
     
-   
 {% block title %}{{block.super}} SignUp {% endblock title %} 
 
  {% block content1 %}

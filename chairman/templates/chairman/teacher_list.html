@@ -3,9 +3,62 @@
 {% load crispy_forms_filters %}
 {% load static %}
 
-{% block link %}
-  <link rel="stylesheet" type="text/css" href="{% static 'chairman/css/teacher_list.css' %}">
-{% endblock link %}
+{% block mystyle %}
+.layout{
+	float: left;
+}
+.box1{
+	height: 280px;
+    margin-right: 15px;
+    position: relative;
+    width: 21rem;
+}
+.image{
+	width: 100%;
+	display: block;
+}
+.contents{
+	position: absolute;
+	opacity: 0;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 21rem;
+	background-color: rgb(54, 81, 202);
+	transition: all 0.3s ease-in;
+	text-align: center;
+}
+.box1:hover .contents, .box2:hover .contents, .box3:hover .contents{
+	opacity: 1;
+	/* transform: translate(20px , 20px); */
+}
+.head-1{
+	padding-top: 50px;
+	font-size: 40px;
+	color: white;
+	font-family: 'Lobster', cursive;
+	letter-spacing: 1.1px;
+}
+.mr-3{
+	margin-right: 8px;
+}
+.icon{
+	color: white;
+}
+.box1:hover{
+    height: 300px;
+	width: 100%;
+}
+.box1:hover img{
+    display: none;
+}
+.box1:hover h5{
+    display: none;
+}
+.delup-btn{
+    margin-bottom: 20px;
+}
+{% endblock mystyle%}
     
    
 {% block title %}{{block.super}} | Teacher List {% endblock title %} 
@@ -39,17 +92,17 @@
                 <div class="col-4 layout">
                   <div class="box1">
                     <div class="image">
-                      <img src={{teacher.profile_img.url}} height="300" style="width: 21rem">
+                      <img src={{teacher.profile_img}} height="300" style="width: 21rem">
                     </div>
                     <div class="contents">
                       <h4 class="head-1">{{teacher.first_name}} {{teacher.last_name}}</h4>
                         <p style="font-size: 25px; color: white;">{{teacher.position}}<b></b></p>
                         <p class="icon">
-                          <span class="mr-3"><i class="fab fa-facebook-square fa-2x"></i></span>
-                          <span class="mr-3"><i class="fab fa-twitter-square fa-2x"></i></span>
-                          <span class="mr-3"><i class="fab fa-youtube-square fa-2x"></i></span>
-                          <span class="mr-3"><i class="fab fa-pinterest-square fa-2x"></i></span>
-                          <span><i class="fab fa-instagram fa-2x"></i></span>
+                          <span class="mr-3"><i class="fa fa-facebook fa-2x" aria-hidden="true"></i></span>
+                          <span class="mr-3"><i class="fa fa-twitter fa-2x" aria-hidden="true"></i></span>
+                          <span class="mr-3"><i class="fa fa-youtube fa-2x" aria-hidden="true"></i></span>
+                          <span class="mr-3"><i class="fa fa-pinterest fa-2x" aria-hidden="true"></i></span>
+                          <span><i class="fa fa-instagram fa-2x" aria-hidden="true"></i></span>
                         </p>
                     </div>
 				          </div>
