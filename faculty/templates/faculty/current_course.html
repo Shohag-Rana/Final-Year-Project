@@ -3,9 +3,11 @@
 {% load crispy_forms_filters %}
 {% load static %}
 
-{% block link %}
-<link rel="stylesheet" type="text/css" href="{% static 'faculty/css/style1.css' %}">
-{% endblock link %}
+{% block mystyle %}
+  .colwidth{
+    width: 70px;
+  }
+{% endblock mystyle %}
     
    
 {% block title %}{{block.super}} | Current Courses {% endblock title %} 
@@ -36,12 +38,232 @@
         {% include  'faculty/profile_sidebar.html' %}
       {% endfor %}
     </div>
+    <div class="col-8">
+      <div>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample1" role="button" aria-expanded="false" aria-controls="collapseExample">
+          1-1
+        </a>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample2" role="button" aria-expanded="false" aria-controls="collapseExample">
+          1-2
+        </a>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample3" role="button" aria-expanded="false" aria-controls="collapseExample">
+        2-1
+        </a>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample4" role="button" aria-expanded="false" aria-controls="collapseExample">
+          2-2
+        </a>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample5" role="button" aria-expanded="false" aria-controls="collapseExample">
+          3-1
+        </a>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample6" role="button" aria-expanded="false" aria-controls="collapseExample">
+          3-2
+        </a>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample7" role="button" aria-expanded="false" aria-controls="collapseExample">
+        4-1
+        </a>
+        <a class="btn btn-primary m-2 colwidth" data-toggle="collapse" href="#collapseExample8" role="button" aria-expanded="false" aria-controls="collapseExample">
+          4-2
+        </a>
+      </div>
+      <div>
+        <div class="collapse" id="collapseExample1">
+          <table class="table table-hover table-dark">
+            <thead>
+              <tr>
+                <th scope="col">Course Code</th>
+                <th scope="col">Credit</th>
+                <th scope="col">Semester Number</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for cr in courses %}
+                  {% if cr.semister_no == '1st Year 1st Semester' %}
+                  <tr>
+                    <td>{{cr.course_code}}</td>
+                    <td>{{cr.credit}}</td>
+                    <td>{{cr.semister_no}}</td>
+                  </tr>  
+                  {% endif %}
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div class="collapse" id="collapseExample2">
+          <table class="table table-hover table-dark">
+            <thead>
+              <tr>
+                <th scope="col">Course Code</th>
+                <th scope="col">Credit</th>
+                <th scope="col">Semester Number</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for cr in courses %}
+                  {% if cr.semister_no == '1st Year 2nd Semester' %}
+                  <tr>
+                    <td>{{cr.course_code}}</td>
+                    <td>{{cr.credit}}</td>
+                    <td>{{cr.semister_no}}</td>
+                  </tr>  
+                  {% endif %}
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    <div>
+      <div class="collapse" id="collapseExample3">
+        <table class="table table-hover table-dark">
+          <thead>
+            <tr>
+              <th scope="col">Course Code</th>
+              <th scope="col">Credit</th>
+              <th scope="col">Semester Number</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for cr in courses %}
+                {% if cr.semister_no == '2nd Year 1st Semester' %}
+                <tr>
+                  <td>{{cr.course_code}}</td>
+                  <td>{{cr.credit}}</td>
+                  <td>{{cr.semister_no}}</td>
+                </tr>  
+                {% endif %}
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="collapse" id="collapseExample4">
+        <table class="table table-hover table-dark">
+          <thead>
+            <tr>
+              <th scope="col">Course Code</th>
+              <th scope="col">Credit</th>
+              <th scope="col">Semester Number</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for cr in courses %}
+                {% if cr.semister_no == '2nd Year 2nd Semester' %}
+                <tr>
+                  <td>{{cr.course_code}}</td>
+                  <td>{{cr.credit}}</td>
+                  <td>{{cr.semister_no}}</td>
+                </tr>  
+                {% endif %}
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="collapse" id="collapseExample5">
+        <table class="table table-hover table-dark">
+          <thead>
+            <tr>
+              <th scope="col">Course Code</th>
+              <th scope="col">Credit</th>
+              <th scope="col">Semester Number</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for cr in courses %}
+                {% if cr.semister_no == '3rd Year 1st Semester' %}
+                <tr>
+                  <td>{{cr.course_code}}</td>
+                  <td>{{cr.credit}}</td>
+                  <td>{{cr.semister_no}}</td>
+                </tr>  
+                {% endif %}
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
     
-    {% for course in courses %}
-        {{course.course_name}}
-        <br>
-    {% endfor %}
-  </div>
+    <div>
+      <div class="collapse" id="collapseExample6">
+        <table class="table table-hover table-dark">
+          <thead>
+            <tr>
+              <th scope="col">Course Code</th>
+              <th scope="col">Credit</th>
+              <th scope="col">Semester Number</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for cr in courses %}
+                {% if cr.semister_no == '3rd Year 2nd Semester' %}
+                <tr>
+                  <td>{{cr.course_code}}</td>
+                  <td>{{cr.credit}}</td>
+                  <td>{{cr.semister_no}}</td>
+                </tr>  
+                {% endif %}
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="collapse" id="collapseExample7">
+        <table class="table table-hover table-dark">
+          <thead>
+            <tr>
+              <th scope="col">Course Code</th>
+              <th scope="col">Credit</th>
+              <th scope="col">Semester Number</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for cr in courses %}
+                {% if cr.semister_no == '4th Year 1st Semester' %}
+                <tr>
+                  <td>{{cr.course_code}}</td>
+                  <td>{{cr.credit}}</td>
+                  <td>{{cr.semister_no}}</td>
+                </tr>  
+                {% endif %}
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="collapse" id="collapseExample8">
+        <table class="table table-hover table-dark">
+          <thead>
+            <tr>
+              <th scope="col">Course Code</th>
+              <th scope="col">Credit</th>
+              <th scope="col">Semester Number</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for cr in courses %}
+                {% if cr.semister_no == '4th Year 2nd Semester' %}
+                <tr>
+                  <td>{{cr.course_code}}</td>
+                  <td>{{cr.credit}}</td>
+                  <td>{{cr.semister_no}}</td>
+                </tr>  
+                {% endif %}
+              {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
 </div>
 {% endblock content2 %}
 
