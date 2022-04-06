@@ -16,8 +16,21 @@
 {% block content2 %}
 <div class="container">
   <div class="row">
-        <div class="col-3"></div>
-        <div class="col-6">
+    <div class="col-lg-5 col-md-6 col-sm-12 mb-3">
+      <div class="card" style="width: 23rem;">
+          <img class="card-img-top" src={{student.profile_image}} alt="Card image cap">
+          <div class="card-body">
+            <h5 class="card-title">{{student.first_name}} {{student.last_name}}</h5>
+            <p class="card-text">Department of Computer Science and Engineering</p>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item"><b>Student ID:</b> {{student.student_id}}</li>
+            <li class="list-group-item"><b>Session:</b>  {{student.session}}</li>
+            <li class="list-group-item"><b>Atached Hall:</b>  {{student.hall}}</li>
+          </ul>
+        </div>
+  </div>
+        <div class="col-lg-7 col-md-6 col-sm-12">
             <h1>Enter New Password </h1>
             <form action="" method="POST" class="uniForm" novalidate>
                 {% csrf_token %}
@@ -26,7 +39,6 @@
         <input type="submit" value="SetPassword" class="btn btn-outline-primary">
     </form>
         </div>
-        <div class="col-3"></div>
     </div>
     
     {% if messages %}

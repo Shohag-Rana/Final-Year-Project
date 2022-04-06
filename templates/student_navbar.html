@@ -46,9 +46,9 @@
            Courses
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="#">Current Courses</a><div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Complete Courses</a><div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Backlog Courses</a>
+            <a class="dropdown-item" href={% url 'current_courses' %}>Current Courses</a><div class="dropdown-divider"></div>
+            <a class="dropdown-item" href={% url 'complete_courses' %}>Complete Courses</a><div class="dropdown-divider"></div>
+            <a class="dropdown-item" href={% url 'course_registration' %}>Registration</a>
              
           </div>
         </li>

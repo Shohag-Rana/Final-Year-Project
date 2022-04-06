@@ -3,9 +3,9 @@ from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, Passwo
 from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib import messages
 from authentication.models import *
-from chairman.forms import CourseForm
-from chairman.models import Course
-from authentication.forms import StudentRegForm, TeacherRegForm
+from chairman.forms import CourseForm, Running_Semester_Form
+from chairman.models import Course, Running_Semester
+from authentication.forms import StudentRegForm, TeacherRegForm, OfficeStuffRegForm
 
 # Create your views here.
 def chairman_profile(request):
@@ -142,7 +142,58 @@ def delete_current_student(request, student_id):
     if request.user.is_admin:
         data = Student.objects.get(id= student_id)
         # data.delete()
-        messages.success(request, 'A student deleted successfully')
+        data = (data.student_id)
+        messages.success(request, ' student deleted successfully', {data})
         return HttpResponseRedirect('/chairman/delete_student_page/')
+    else:
+        return HttpResponseRedirect('/')
+
+def delete_stuff_page(request):
+    if request.user.is_admin:
+        stuffs = OfficeStuff.objects.all()
+        return render(request, 'chairman/stuff_list.html', {'stuffs': stuffs})
+    else:
+        return HttpResponseRedirect('/')
+
+def delete_current_stuff(request, stuff_id):
+    if request.user.is_admin:
+        data = OfficeStuff.objects.get(id= stuff_id)
+        # data.delete()
+        data = (data.first_name + data.last_name)
+        messages.warning(request, 'requested stuff deleted successfully', {data})
+        return HttpResponseRedirect('/chairman/delete_stuff_page/')
+    else:
+        return HttpResponseRedirect('/')
+
+def chairman_stuff_reg(request):
+    if request.user.is_admin:
+        if request.method == 'POST':
+            form = OfficeStuffRegForm(request.POST, request.FILES)
+            if form.is_valid():
+                # form.save()
+                messages.success(request, 'A stuff account created successfully')
+                return HttpResponseRedirect('/chairman/profile/')
+                    
+            else:
+                messages.info(request, 'Enter the correct value!!!')
+        form = OfficeStuffRegForm()
+        return render(request, 'chairman/officestuff_signup.html', {'form': form})
+    return HttpResponseRedirect('/')
+
+def add_semesters(request):
+    if request.user.is_admin:
+        Running_Semesters = Running_Semester.objects.all()
+        form = Running_Semester_Form()
+        if request.method == 'POST':
+            form = Running_Semester_Form(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'semester added successfully')
+                return HttpResponseRedirect('/chairman/add_semesters/')
+            else:
+                messages.warning(request, 'Enter the correct data!!!')
+                return HttpResponseRedirect('/chairman/add_semesters/')
+        else:
+            return render(request, 'chairman/add_semesters.html', {'form': form, 'Running_Semesters': Running_Semesters})
     else:
         return HttpResponseRedirect('/')

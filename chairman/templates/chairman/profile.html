@@ -29,9 +29,9 @@
 <div class="container">
   <div class="row">
     {% include 'chairman/profile_sidebar.html' %}
-      <div class="col-8">
+      <div class="col-lg-8 col-md-6 col-sm-12">
         <div class="row">
-           <div class="col-6 mb-5">
+           <div class="col-md-6 mb-5">
                 <div class="card">
                     <div class="card-header">
                       Task-01
@@ -41,12 +41,12 @@
                       <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                     </div>
                     <div class="card-footer">
-                        <a href={% url 'chairman_teacher_reg' %} class="btn btn-primary mr-5">Add Faculty</a>
-                        <a href={% url 'delete_faculty_page' %} class="btn btn-primary float-right">Delete Faculty</a>
+                        <a href={% url 'chairman_teacher_reg' %} class="btn btn-primary mr-5 mb-2">Add Faculty</a>
+                        <a href={% url 'delete_faculty_page' %} class="btn btn-primary mb-2 float-right">Delete Faculty</a>
                     </div>
                 </div>
             </div>
-           <div class="col-6 mb-5">
+           <div class="col-md-6 mb-5">
                 <div class="card">
                     <div class="card-header">
                       Task-02
@@ -56,15 +56,15 @@
                       <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                     </div>
                     <div class="card-footer">
-                        <a href={% url 'chairman_student_reg' %} class="btn btn-primary mr-5">Add Student</a>
-                        <a href={% url 'delete_student_page' %} class="btn btn-primary float-right">Delete Student</a>
+                        <a href={% url 'chairman_student_reg' %} class="btn btn-primary mr-5 mb-2">Add Student</a>
+                        <a href={% url 'delete_student_page' %} class="btn btn-primary mb-2 float-right">Delete Student</a>
                     </div>
                   </div>
                </div>
             </div>
 
           
-            <div class="col-12 mb-5">
+            <div class="col-sm-12 col-md-6 col-lg-6 mb-5">
                 <div class="card">
                     <div class="card-header">
                       Task-03
@@ -74,8 +74,8 @@
                       <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                     </div>
                     <div class="card-footer">
-                      <a href="/playersignup/" class="btn btn-primary mr-5">Add Stuff</a>
-                      <a href="/delete_player/1/" class="btn btn-primary">Delete Stuff</a>
+                      <a href={% url 'chairman_stuff_reg' %} class="btn btn-primary mr-5 mb-2">Add Stuff</a>
+                      <a href={% url 'delete_stuff_page' %} class="btn btn-primary mb-2">Delete Stuff</a>
                     </div>
                   </div>
                </div>

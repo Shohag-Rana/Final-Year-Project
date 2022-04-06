@@ -49,7 +49,7 @@ def student_signup(request):
                 # email.send()
                 fm.save()
                 messages.success(request, 'Successfully created account')
-                messages.success(request, 'Activate your account from email')
+                # messages.success(request, 'Activate your account from email')
                 return HttpResponseRedirect('/auth/login/')
         else:
             fm = StudentRegForm()

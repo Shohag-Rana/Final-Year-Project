@@ -1,5 +1,5 @@
 from django import forms
-from . models import Course
+from . models import Course, Running_Semester
 
 class CourseForm(forms.ModelForm):
     class Meta:
@@ -22,3 +22,11 @@ class CourseForm(forms.ModelForm):
             'course_teacher': forms.Select(attrs={'class': 'form-control'}),
         }
 
+class Running_Semester_Form(forms.ModelForm):
+    class Meta:
+        model = Running_Semester
+        fields = '__all__'
+        widgets = {
+            'semester_no': forms.Select(attrs={'class': 'form-control'}),
+            'session': forms.Select(attrs={'class': 'form-control'}),
+        }
