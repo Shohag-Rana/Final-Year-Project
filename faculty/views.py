@@ -4,7 +4,7 @@ from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from authentication.models import *
-from chairman.models import Course
+from chairman.models import Course, Teacher_Student_Info
 # Create your views here.
 def faculty_profile(request):
     if request.user.is_authenticated:
@@ -77,3 +77,17 @@ def current_course(request):
         return render(request, 'faculty/current_course.html', {'courses': courses, 'faculty': faculty})
     else:
         return HttpResponseRedirect('/')
+
+def course_details(request, course_code):
+    students = Teacher_Student_Info.objects.filter(course_code = course_code)
+    course = Course.objects.get(course_code= course_code)
+    c_code = (course.course_code)
+    c_name = (course.course_name)
+    c_credit = (course.credit)
+    context = {
+        'c_code': c_code,
+        'c_name': c_name,
+        'c_credit': c_credit,
+        'students': students,
+    }
+    return render(request, 'faculty/course_details.html', context)

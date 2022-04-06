@@ -10,6 +10,5 @@ urlpatterns = [
    	path('current_courses/', views.current_courses, name= 'current_courses'),
    	path('complete_courses/', views.complete_courses, name= 'complete_courses'),
    	path('course_registration/', views.course_registration, name= 'course_registration'),
-
-
+   	
 ]

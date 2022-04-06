@@ -7,4 +7,5 @@ urlpatterns = [
     path('faculty_pswreset2/', views.faculty_pswreset2, name="faculty_pswreset2"),
     path('faculty_logout/', views.faculty_logout, name="faculty_logout"),
     path('current_course/', views.current_course, name="current_course"),
+    path('course_details/<str:course_code>/', views.course_details, name="course_details"),
 ]
