@@ -64,6 +64,11 @@ class Roll_Sheet(models.Model):
     hall = models.CharField(max_length=299)
     course_code = models.CharField(max_length=500)
     remarks = models.CharField(max_length=150)
+    semester = models.CharField(
+        max_length=120,
+        choices= semister,
+        default= '3rd Year 1st Semester',
+    )
 
 class Teacher_Student_Info(models.Model):
     student_name = models.CharField(max_length=200)
@@ -74,3 +79,9 @@ class Teacher_Student_Info(models.Model):
     hall = models.CharField(max_length=150)
     session = models.CharField(max_length=120)
     credit = models.FloatField()
+    remarks = models.CharField(max_length=150, default='Regular')
+    semester = models.CharField(
+        max_length=120,
+        choices= semister,
+        default= '3rd Year 1st Semester',
+    )

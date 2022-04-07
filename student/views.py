@@ -118,12 +118,113 @@ def course_registration(request):
     sem = semester.semester_no
     courses = Course.objects.filter(semister_no = sem)
     course_code = []
+    backlog_course_code = []
     if request.method == 'POST':
+
+        #handle backlog course
+        back_log_credit = 0
+        bl1 = request.POST.get('backLog1')
+        if bl1:
+            check_bl1_course = Course.objects.filter(course_code = bl1)
+            flag = False
+            for course in check_bl1_course:
+                flag = True
+                back_log_credit += course.credit
+            if flag == True:
+                backlog_course_code.append(bl1)
+            else:
+                messages.warning(request, 'is not a valid course code', {bl1})
+                return HttpResponseRedirect('/student/course_registration/')
+
+        bl2 = request.POST.get('backLog2')
+        if bl2:
+            check_bl2_course = Course.objects.filter(course_code = bl2)
+            flag = False
+            for course in check_bl2_course:
+                flag = True
+                back_log_credit += course.credit
+            if flag == True:
+                backlog_course_code.append(bl2)
+            else:
+                messages.warning(request, 'is not a valid course code', {bl2})
+                return HttpResponseRedirect('/student/course_registration/')
+
+        bl3 = request.POST.get('backLog3')
+        if bl3:
+            check_bl3_course = Course.objects.filter(course_code = bl3)
+            flag = False
+            for course in check_bl3_course:
+                flag = True
+                back_log_credit += course.credit
+            if flag == True:
+                backlog_course_code.append(bl3)
+            else:
+                messages.warning(request, 'is not a valid course code', {bl3})
+                return HttpResponseRedirect('/student/course_registration/')
+
+        bl4 = request.POST.get('backLog4')
+        if bl4:
+            check_bl4_course = Course.objects.filter(course_code = bl4)
+            flag = False
+            for course in check_bl4_course:
+                flag = True
+                back_log_credit += course.credit
+            if flag == True:
+                backlog_course_code.append(bl4)
+            else:
+                messages.warning(request, 'is not a valid course code', {bl4})
+                return HttpResponseRedirect('/student/course_registration/')
+        
+        bl5 = request.POST.get('backLog5')
+        if bl5:
+            check_bl5_course = Course.objects.filter(course_code = bl5)
+            flag = False
+            for course in check_bl5_course:
+                flag = True
+                back_log_credit += course.credit
+            if flag == True:
+                backlog_course_code.append(bl5)
+            else:
+                messages.warning(request, 'is not a valid course code', {bl5})
+                return HttpResponseRedirect('/student/course_registration/')
+        
+        bl6 = request.POST.get('backLog6')
+        if bl6:
+            check_bl6_course = Course.objects.filter(course_code = bl6)
+            flag = False
+            for course in check_bl6_course:
+                flag = True
+                back_log_credit += course.credit
+            if flag == True:
+                backlog_course_code.append(bl6)
+            else:
+                messages.warning(request, 'is not a valid course code', {bl6})
+                return HttpResponseRedirect('/student/course_registration/')
+
+        
+        #credit count
+        total_credit = 0
+        for course in courses:
+            total_credit += course.credit
+        total_credit += back_log_credit
+
+        if total_credit > 30:
+            messages.info(request, 'Total course credit can not more than 30')
+            return HttpResponseRedirect('/student/course_registration/')
+
+
+
+
+
+
+
         session = student.session
         student_id = student.student_id
         name_of_student = student.first_name + " " + student.last_name
         hall = student.hall
         remarks = 'Regular'
+
+        #regular course add to teacher
         for course in courses:
             course_code.append((course.course_code))
             c_code = course.course_code
@@ -141,17 +242,56 @@ def course_registration(request):
                 hall = hall,
                 session = session,
                 credit = credit,
-                )
+                remarks= 'Regular',
+                semester = semister_no,
+            )
             check_teacher_stu = Teacher_Student_Info.objects.filter(student_name= name_of_student, course_code = c_code, teacher = teacher)
             flag = False
             for check in check_teacher_stu:
                 flag = True
             if flag == True:
                 messages.warning(request, 'You are already registered these courses!!!')
+                return HttpResponseRedirect('/student/course_registration/')
                 break;
             else:
                 data.save()
                 messages.success(request, 'course added successfully to the teacher')
+
+        
+        #backlog course information add to teacher
+        for backLogCourseCode in backlog_course_code:
+            course_code.append(backLogCourseCode)
+            c_code = backLogCourseCode
+            current_course = Course.objects.get(course_code = c_code)
+            teacher = current_course.course_teacher
+            credit = current_course.credit
+            semister_no = current_course.semister_no
+            course_name = current_course.course_name
+            remarks = 'BackLog'
+            data = Teacher_Student_Info(
+                student_name = name_of_student,
+                student_id = student_id,
+                course_name = course_name,
+                course_code = c_code,
+                teacher = teacher,
+                hall = hall,
+                session = session,
+                credit = credit,
+                remarks= remarks,
+                semester = semister_no,
+            )
+            check_teacher_stu = Teacher_Student_Info.objects.filter(student_name= name_of_student, course_code = c_code, teacher = teacher)
+            flag = False
+            for check in check_teacher_stu:
+                flag = True
+            if flag == True:
+                messages.warning(request, 'You are already registered these courses!!!')
+                return HttpResponseRedirect('/student/course_registration/')
+            else:
+                data.save()
+                messages.success(request, 'course added successfully to the teacher')
+
+
         check = Roll_Sheet.objects.filter(student_id= student_id)
         flag = False
         for c in check:
@@ -159,7 +299,7 @@ def course_registration(request):
         if flag == True:
             messages.warning(request, 'You are already registered in this semester!!!')
         else:
-            data = Roll_Sheet(session= session, student_id= student_id, name_of_student= name_of_student, hall= hall, course_code= course_code, remarks= remarks)
+            data = Roll_Sheet(session= session, student_id= student_id, name_of_student= name_of_student, hall= hall, course_code= course_code, remarks= remarks, semester=semister_no)
             messages.success(request, 'one item added to the roll sheet')
             data.save()
     return render(request, 'student/course_registration.html',{'student':student, 'sem': sem, 'courses': courses})

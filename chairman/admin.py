@@ -4,7 +4,7 @@ from . models import Course, Running_Semester, Roll_Sheet, Teacher_Student_Info
 # Register your models here.
 @admin.register(Course)
 class CourseModelAdmin(admin.ModelAdmin):
-    list_display = ['course_code', 'course_name']
+    list_display = ['course_code', 'course_name', 'course_teacher']
 
 @admin.register(Running_Semester)
 class Running_SemesterModelAdmin(admin.ModelAdmin):

@@ -4,7 +4,7 @@ from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib import messages
 from authentication.models import *
 from chairman.forms import CourseForm, Running_Semester_Form
-from chairman.models import Course, Running_Semester
+from chairman.models import Course, Roll_Sheet, Running_Semester, Teacher_Student_Info
 from authentication.forms import StudentRegForm, TeacherRegForm, OfficeStuffRegForm
 
 # Create your views here.
@@ -197,3 +197,11 @@ def add_semesters(request):
             return render(request, 'chairman/add_semesters.html', {'form': form, 'Running_Semesters': Running_Semesters})
     else:
         return HttpResponseRedirect('/')
+
+def show_roll_sheet(request, semester_no= '1st Year 1st Semester'):
+    all_students = Teacher_Student_Info.objects.filter(semester= semester_no)
+    course_codes = Course.objects.filter(semister_no= semester_no)
+    count =0
+    for c in course_codes:
+        count+=1
+    return render(request, 'chairman/show_roll_sheet.html', {'all_students': all_students, 'course_codes': course_codes, 'semester_no': semester_no, 'count': count})

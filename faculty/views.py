@@ -84,10 +84,12 @@ def course_details(request, course_code):
     c_code = (course.course_code)
     c_name = (course.course_name)
     c_credit = (course.credit)
+    c_teacher = course.course_teacher
     context = {
         'c_code': c_code,
         'c_name': c_name,
         'c_credit': c_credit,
         'students': students,
+        'c_teacher': c_teacher,
     }
     return render(request, 'faculty/course_details.html', context)
