@@ -201,7 +201,8 @@ def add_semesters(request):
 def show_roll_sheet(request, semester_no= '1st Year 1st Semester'):
     all_students = Teacher_Student_Info.objects.filter(semester= semester_no)
     course_codes = Course.objects.filter(semister_no= semester_no)
+    students = Student.objects.all()
     count =0
     for c in course_codes:
         count+=1
-    return render(request, 'chairman/show_roll_sheet.html', {'all_students': all_students, 'course_codes': course_codes, 'semester_no': semester_no, 'count': count})
+    return render(request, 'chairman/show_roll_sheet.html', {'all_students': all_students, 'course_codes': course_codes, 'semester_no': semester_no, 'count': count, 'students': students})

@@ -4,9 +4,7 @@ from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm, UserChangeForm
 from chairman.models import Course, Running_Semester, Roll_Sheet, Teacher_Student_Info
-import io
-from django.http import FileResponse
-from reportlab.pdfgen import canvas
+
 
 def student_profile(request):
     if request.user.is_authenticated:
@@ -289,7 +287,7 @@ def course_registration(request):
                 return HttpResponseRedirect('/student/course_registration/')
             else:
                 data.save()
-                messages.success(request, 'course added successfully to the teacher')
+                #messages.success(request, 'course added successfully to the teacher')
 
 
         check = Roll_Sheet.objects.filter(student_id= student_id)
@@ -300,7 +298,7 @@ def course_registration(request):
             messages.warning(request, 'You are already registered in this semester!!!')
         else:
             data = Roll_Sheet(session= session, student_id= student_id, name_of_student= name_of_student, hall= hall, course_code= course_code, remarks= remarks, semester=semister_no)
-            messages.success(request, 'one item added to the roll sheet')
+            messages.success(request, 'Your Registration is successfull!!!')
             data.save()
     return render(request, 'student/course_registration.html',{'student':student, 'sem': sem, 'courses': courses})
 

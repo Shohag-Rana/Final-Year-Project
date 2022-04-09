@@ -272,7 +272,7 @@
                   <td>{{cr.course_code}}</td>
                   <td>{{cr.credit}}</td>
                   <td>{{cr.semister_no}}</td>
-                  <td><a href={% url 'course_details' cr.course_code %}>details</a></td>
+                  <td><a href={% url 'course_details' cr.course_code %} type="button" class="btn btn-info">details</a></td>
                 </tr>  
                 {% endif %}
               {% endfor %}

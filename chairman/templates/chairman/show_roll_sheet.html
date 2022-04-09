@@ -67,34 +67,34 @@
                 <th scope="col">SI No</th>
                 <th scope="col">Session</th>
                 <th scope="col">Student Id</th>
-                <th scope="col">Name of th Candidates</th>
+                <th scope="col">Name of the Candidates</th>
                 <th scope="col">Hall</th>
                 <th colspan="{{count}}">Course Code</th>
                 <th scope="col">Remarks</th>
               </tr>
             </thead>
             <tbody>
-                {% for info in all_students %}
-                <tr>
-                    <td style="font-size: 13px">{{forloop.counter}}</td>
-                    <td style="font-size: 13px">{{info.session}}</td>
-                    <td style="font-size: 13px">{{info.student_id}}</td>
-                    <td style="font-size: 13px">{{info.student_name}}</td>
-                    <td style="font-size: 13px">{{info.hall}}</td>
-                    {% for course in course_codes %}
-                        {% if info.course_code == course.course_code %}
-                            <td style="font-size: 13px">{{course.course_code}}</td>
+                    {% for info in all_students %}
+                    <tr>
+                        <td style="font-size: 13px">{{forloop.counter}}</td>
+                        <td style="font-size: 13px">{{info.session}}</td>
+                        <td style="font-size: 13px">{{info.student_id}}</td>
+                        <td style="font-size: 13px">{{info.student_name}}</td>
+                        <td style="font-size: 13px">{{info.hall}}</td>
+                        {% for course in course_codes %}
+                            {% if info.course_code == course.course_code %}
+                                <td style="font-size: 13px">{{course.course_code}}</td>
+                            {% else %}
+                                <td style="font-size: 13px">...</td>
+                            {% endif %}
+                        {% endfor %}
+                        {% if info.remarks == 'BackLog' %}
+                            <td class="text-danger" style="font-size: 13px">{{info.remarks}}</td>
                         {% else %}
-                            <td style="font-size: 13px">...</td>
+                            <td style="font-size: 13px">{{info.remarks}}</td>
                         {% endif %}
+                    </tr>
                     {% endfor %}
-                    {% if info.remarks == 'BackLog' %}
-                        <td class="text-danger" style="font-size: 13px">{{info.remarks}}</td>
-                    {% else %}
-                        <td style="font-size: 13px">{{info.remarks}}</td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
             </tbody>
           </table>
     </div>
