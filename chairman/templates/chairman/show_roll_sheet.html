@@ -4,10 +4,25 @@
 {% load crispy_forms_filters %}  
 
 {% block mystyle %}
+
 .btn-width{
     width: 135px;
     margin-right: 5px;
     margin-bottom: 3px;
+}
+td{
+    width: -1px !important;
+    border: 1px solid black;
+    padding: 9px !important;
+}
+th{
+    border: 2px solid black !important;
+}
+tr{
+    border-bottom: 1px solid black;
+}
+thead{
+    border-top: 2px solid black;
 }
 {% endblock mystyle%}
    
@@ -30,29 +45,10 @@
 </div>
 {% endblock content1 %}
 {% block content2 %}
-<div class="container">
-    <div class="row">
-            <a href={% url 'show_roll_sheet' '1st Year 1st Semester' %} class="btn btn-danger  btn-width text-center text-white">1-1</a>
 
-            <a href={% url 'show_roll_sheet' '1st Year 2nd Semester' %} class="btn btn-danger  btn-width text-center text-white">1-2</a>
-
-            <a href={% url 'show_roll_sheet' '2nd Year 1st Semester' %} class="btn btn-danger btn-width  text-center text-white">2-1</a>
-
-            <a href={% url 'show_roll_sheet' '2nd Year 2nd Semester' %} class="btn btn-danger  btn-width text-center text-white">2-2</a>
-
-            <a href={% url 'show_roll_sheet' '3rd Year 1st Semester' %} class="btn btn-danger  btn-width text-center text-white">3-1</a>
-
-            <a href={% url 'show_roll_sheet' '3rd Year 2nd Semester' %} class="btn btn-danger  btn-width text-center text-white">3-2</a>
-
-            <a href={% url 'show_roll_sheet' '4th Year 1st Semester' %} class="btn btn-danger  btn-width text-center text-white">4-1</a>
-
-            <a href={% url 'show_roll_sheet' '4th Year 2nd Semester' %} class="btn btn-danger  btn-width text-center text-white">4-2</a>
-
-    </div>
-</div>
-    <div class="row mb-5">
+    <div class="row mb-1">
         <div class="col-3"></div>
-        <div class="col-6">
+        <div class="col-6 text-center">
             <h2 class="mt-3" style="letter-spacing: 5px;"><b>Corrected Roll Sheet</b></h2>
             <p class=""><b>Department:</b>  Computer Science and Engineering ( CSE )</p>
             <p>{{semester_no}} B.Sc.(Engg.) Final Examination-20**</p>
@@ -60,43 +56,89 @@
         </div>
         <div class="col-3"></div>
     </div>
-    <div class="row">
-        <table class="table table-bordered table-hover text-center">
-            <thead class="bg-dark text-white">
-              <tr>
-                <th scope="col">SI No</th>
-                <th scope="col">Session</th>
-                <th scope="col">Student Id</th>
-                <th scope="col">Name of the Candidates</th>
-                <th scope="col">Hall</th>
-                <th colspan="{{count}}">Course Code</th>
-                <th scope="col">Remarks</th>
-              </tr>
-            </thead>
-            <tbody>
-                    {% for info in all_students %}
-                    <tr>
-                        <td style="font-size: 13px">{{forloop.counter}}</td>
-                        <td style="font-size: 13px">{{info.session}}</td>
-                        <td style="font-size: 13px">{{info.student_id}}</td>
-                        <td style="font-size: 13px">{{info.student_name}}</td>
-                        <td style="font-size: 13px">{{info.hall}}</td>
-                        {% for course in course_codes %}
-                            {% if info.course_code == course.course_code %}
+    <div class="p-3">
+        <div class="row">
+            <table class="table table-bordered table-hover text-center">
+                <thead class="text-dark" style="padding: 2px ; font-size:13px">
+                  <tr>
+                    <th>SI No</th>
+                    <th>Session</th>
+                    <th>Student Id</th>
+                    <th>Student Name</th>
+                    <th>Hall</th>
+                    <th colspan="{{count}}">Course Code</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% comment %} regular courses and students {% endcomment %}
+                        {% for student in students_regular %}
+                        <tr>
+                            <td style="font-size: 13px">{{forloop.counter}}</td>
+                            <td style="font-size: 13px">{{student.session}}</td>
+                            <td style="font-size: 13px">{{student.student_id}}</td>
+                            <td style="font-size: 13px">{{student.name_of_the_candidates}}</td>
+                            <td style="font-size: 13px">{{student.hall}}</td>
+                            {% for course in course_codes %}
                                 <td style="font-size: 13px">{{course.course_code}}</td>
-                            {% else %}
-                                <td style="font-size: 13px">...</td>
-                            {% endif %}
+                            {% endfor %}   
+                            <td style="font-size: 13px">{{student.remarks}}</td>
+                        </tr>
                         {% endfor %}
-                        {% if info.remarks == 'BackLog' %}
-                            <td class="text-danger" style="font-size: 13px">{{info.remarks}}</td>
-                        {% else %}
-                            <td style="font-size: 13px">{{info.remarks}}</td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-            </tbody>
-          </table>
+                        
+                        {% comment %} backlog courses and students {% endcomment %}
+
+                        {% for student, courseCodes in backLog_students_and_courses.items %}
+                        <tr>
+                            <td style="font-size: 13px">{{forloop.counter}}</td>
+                            <td style="font-size: 13px">{{student.session}}</td>
+                            <td style="font-size: 13px">{{student.student_id}}</td>
+                            <td style="font-size: 13px">{{student.name_of_the_candidates}}</td>
+                            <td style="font-size: 13px">{{student.hall}}</td>
+                            
+                            {% for code in courseCodes %}
+                                {% if code == " " %}
+                                    <td style="font-size: 13px">-</td>
+                                {% else %}
+                                    <td style="font-size: 13px">{{code}}</td>
+                                {% endif %}
+                            {% endfor %}
+                            {% if student.remarks == 'BackLog' %}
+                                <td class="text-danger" style="font-size: 13px">{{student.remarks}}</td>
+                            {% else %}
+                                <td style="font-size: 13px">{{student.remarks}}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+
+                        {% comment %} special courses and students {% endcomment %}
+
+                        {% for student, courseCodes in special_students_and_courses.items %}
+                        <tr>
+                            <td style="font-size: 13px">{{forloop.counter}}</td>
+                            <td style="font-size: 13px">{{student.session}}</td>
+                            <td style="font-size: 13px">{{student.student_id}}</td>
+                            <td style="font-size: 13px">{{student.name_of_the_candidates}}</td>
+                            <td style="font-size: 13px">{{student.hall}}</td>
+                            
+                            {% for code in courseCodes %}
+                                {% if code == " " %}
+                                    <td style="font-size: 13px">-</td>
+                                {% else %}
+                                    <td style="font-size: 13px">{{code}}</td>
+                                {% endif %}
+                            {% endfor %}
+                            {% if student.remarks == 'Special' %}
+                                <td class="text-danger" style="font-size: 13px">{{student.remarks}}</td>
+                            {% else %}
+                                <td style="font-size: 13px">{{student.remarks}}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+    
+                </tbody>
+              </table>
+        </div>
     </div>
 {% endblock content2 %}
 

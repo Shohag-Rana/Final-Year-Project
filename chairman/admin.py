@@ -1,5 +1,10 @@
 from django.contrib import admin
 from . models import Course, Running_Semester, Roll_Sheet, Teacher_Student_Info
+from . models import Registration_By_Semester
+# Register your models here.
+@admin.register(Registration_By_Semester)
+class CourseModelAdmin(admin.ModelAdmin):
+    list_display = ['session', 'student_id', 'name_of_the_candidates', 'semester_name']
 
 # Register your models here.
 @admin.register(Course)

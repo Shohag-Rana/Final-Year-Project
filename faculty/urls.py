@@ -10,9 +10,9 @@ urlpatterns = [
     path('current_course/', views.current_course, name="current_course"),
     path('course_details/<str:course_code>/', views.course_details, name="course_details"),
     path('attendence_sheet/<str:course_code>/', views.attendence_sheet, name="attendence_sheet"),
-    # path('ct_and_attendence_mark/', views.ct_and_attendence_mark, name="ct_and_attendence_mark"),
     path('ct_and_attendence_mark/<str:course_code>/', views.ct_and_attendence_mark, name="ct_and_attendence_mark"),
-    path('student_ct_and_attendence_mark/<str:course_code>/<str:student_id>/', views.student_ct_and_attendence_mark, name="student_ct_and_attendence_mark"),
+    path('student_ct_and_attendence_mark/<str:course_code>/', views.student_ct_and_attendence_mark, name="student_ct_and_attendence_mark"),
+    path('edit_ct_and_attendence_mark/<str:course_code>/', views.edit_ct_and_attendence_mark, name="edit_ct_and_attendence_mark"),
     
     #pdf file url
     #path('attendence_pdf/', attendence_pdf, name="attendence_pdf"),

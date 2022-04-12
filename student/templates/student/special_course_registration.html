@@ -87,13 +87,13 @@
                 </div>
                 <ul class="list-group list-group-flush">
                 <li class="list-group-item"><b>Student ID:</b> {{student.student_id}}</li>
-                <li class="list-group-item"><b>Session:</b>  {{student.session}}</li>
+                <li class="list-group-item"><b>Session: {{session}}</b>  {{student.session}}</li>
                 <li class="list-group-item"><b>Attached Hall:</b>  {{student.hall}}</li>
                 </ul>
             </div>
             </div>
         </div>
-    <div class="col-lg-9 col-md-8 col-sm-12">
+    <div class="col-lg-9 col-md-8 col-sm-12" style="padding-right: 20px !important">
         <div class="row">
             <div class="col-3 img-margin">
                 <img src="https://i.ibb.co/rMJ1HWV/OIP.jpg" alt="OIP" height="100px" width="100px">
@@ -110,64 +110,80 @@
             </h6>
         </div>
         <div class="row">
-            <h6>Name of the Dept: <span class="dept-margin">CSE</span> <span class="sem-margin">Semester: {{sem}}</span> <span>Session: <span class="session-margin"></span>{{student.session}}</span></h6>
+            <h6>Name of the Dept: <span class="dept-margin">CSE</span> <span class="sem-margin">Semester: No Semester Available for you</span> <span>Session: <span class="session-margin"></span>{{student.session}}</span></h6>
         </div>
         <div class="row">
             <h6>Name of the Hall: <span class="hall-margin"></span>{{student.hall}}</h6>
         </div>
-        <div class="row mt-4">
-            <h5><b>Regular Courses***</b></h5>
-        </div>
         <div class="row">
-            <form action="" method="POST">
+            <form action="" method="POST" style="border: 1px solid gray" class="pb-4">
                 {% csrf_token %}
-            <table class="table table-striped table-bordered table-hover">
-                <thead>
-                  <tr>
-                    <th scope="col">SI No</th>
-                    <th scope="col">Course Code</th>
-                    <th scope="col">Course Title</th>
-                    <th scope="col">Credits</th>
-                    <th scope="col">Remarks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {% for course in courses %}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td><input type="text" value="{{course.course_code}}" style="width: 120px;" disabled></td>
-                        <td>{{course.course_name}}</td>
-                        <td>{{course.credit}}</td>
-                        <td>Regular</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% if bl_courses %}
-            <div class="row mt-5">
-                <h5><b>BackLog Courses***</b></h5>
-            </div>
 
-            <div class="mt-4 mb-4">
+            <div>
+                <div class="row mt-5 mb-5">
+                    <h5><b>BackLog Courses***</b></h5>
+                </div>
                 <div class="accordion" id="myAccordion">
                     {% for semester in backLogSemester %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading_{{forloop.counter}}">
-                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse_{{forloop.counter}}">{{semester}}</button>									
+                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse_{{forloop.counter}}">{{semester.semester_no}}</button>									
                         </h2>
                         <div id="collapse_{{forloop.counter}}" class="accordion-collapse collapse" data-bs-parent="#myAccordion">
+                            <div class="card-body">
+                                <table class="table table-striped table-bordered table-hover w-100">
+                                    <thead>
+                                        <tr>
+                                          <th scope="col">SI No</th>
+                                          <th scope="col">Course Code</th>
+                                          <th scope="col">Course Title</th>
+                                          <th scope="col">Credits</th>
+                                          <th scope="col">Remarks</th>
+                                        </tr>
+                                      </thead>
+                                    <tbody>
+                                        {% for b_course in backLogCourses %}
+                                        {% if b_course.semister_no == semester.semester_no %}
+                                            <tr>
+                                                <td>{{forloop.counter}}</td>
+                                                <td><input type="checkbox" id="{{b_course.course_code}}" name="{{b_course.course_code}}" value="{{b_course.course_code}}"><span class="c_code_margin">{{b_course.course_code}}</span></td>
+                                                <td><label for="{{b_course.course_code}}">{{b_course.course_name}}</label></td>
+                                                <td>{{b_course.credit}}</td>
+                                                <td>BackLog</td>
+                                            </tr>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div> 
+            <div>
+                <div class="row mt-5 mb-5">
+                    <h5><b>Special Courses***</b></h5>
+                </div>
+                <div class="accordion" id="myAccordion2">
+                    {% for semester in specialSemester %}
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading_{{forloop.counter0}}">
+                            <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse_{{forloop.counter0}}">{{semester}}</button>									
+                        </h2>
+                        <div id="collapse_{{forloop.counter0}}" class="accordion-collapse collapse" data-bs-parent="#myAccordion2">
                             <table class="table table-striped table-bordered table-hover">
                                 <thead>
-                                    <tr>
-                                      <th scope="col">SI No</th>
-                                      <th scope="col">Course Code</th>
-                                      <th scope="col">Course Title</th>
-                                      <th scope="col">Credits</th>
-                                      <th scope="col">Remarks</th>
-                                    </tr>
-                                  </thead>
+                                  <tr>
+                                    <th scope="col">SI No</th>
+                                    <th scope="col">Course Code</th>
+                                    <th scope="col">Course Title</th>
+                                    <th scope="col">Credits</th>
+                                    <th scope="col">Special</th>
+                                  </tr>
+                                </thead>
                                 <tbody>
-                                    {% for b_course in bl_courses %}
+                                    {% for b_course in specialCourses %}
                                     {% if b_course.semister_no == semester %}
                                         <tr>
                                             <td>{{forloop.counter}}</td>
@@ -178,15 +194,13 @@
                                         </tr>
                                     {% endif %}
                                     {% endfor %}
-                                </tbody>
-                            </table>
+                            </table> 
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-            </div> 
-            {% endif %}
-            <input type="submit" class="btn btn-success w-100 mt-3" value="Registration Now">
+            </div>
+            <input type="submit" class="btn btn-success w-100 mt-5" value="Registration Now">
             </form>
         </div>
     </div>

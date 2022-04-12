@@ -113,6 +113,8 @@ def ct_and_attendence_mark(request, course_code):
     course = Course.objects.get(course_code= course_code)
     students = Teacher_Student_Info.objects.filter(course_code= course_code)
     ct_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+    for check in ct_attend_marks:
+        return HttpResponseRedirect(f'/faculty/edit_ct_and_attendence_mark/{course_code}/') 
     context = {
         'semister_no': course.semister_no,
         'c_code': course_code,
@@ -121,56 +123,156 @@ def ct_and_attendence_mark(request, course_code):
         'c_name': course.course_name,
         'students': students,
         'ct_attend_marks': ct_attend_marks,
-        'flag': False,
         }
-    return render(request, 'faculty/ct_and_attendence_mark.html', context)
-
-def student_ct_and_attendence_mark(request, course_code, student_id):
-    course = Course.objects.get(course_code= course_code)
-    student = Student.objects.get(student_id = student_id)
-    students = Teacher_Student_Info.objects.filter(course_code= course_code)
-    remarks = Teacher_Student_Info.objects.get(student_id= student_id, course_code= course_code)
-    context = {
+    if request.method == 'POST':
+        course = Course.objects.get(course_code= course_code)
+        students = Teacher_Student_Info.objects.filter(course_code= course_code)
+        ct_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+        context = {
             'semister_no': course.semister_no,
             'c_code': course_code,
             'c_teacher': course.course_teacher,
             'credit': course.credit,
             'c_name': course.course_name,
             'students': students,
-            'student': student,
-        }
-    if request.method == 'POST':
-        student_id = student_id
-        student_name = student.first_name + " "+ student.last_name
-        session = student.session
-        semester_no = course.semister_no
-        course_code = course_code
-        course_name = course.course_name
-        course_teacher = course.course_teacher
-        credit = course.credit
-        remarks = remarks.remarks
-        ct_marks = (int(request.POST.get('ct_marks')))
-        attendence_marks = (int(request.POST.get('attendence_marks')))
-        total_ct_and_attendence_marks = ct_marks + attendence_marks
-        if ct_marks > 20 or attendence_marks > 10:
-            messages.warning(request, 'ct marks can not greater than 20 and attend. mark 10!!!')
-            return HttpResponseRedirect(f'/faculty/student_ct_and_attendence_mark/{course_code}/{student_id}/')
-        else:
-            data = Attendence_and_CT_Mark(
-                student_id = student_id,
-                student_name = student_name,
-                session = session,
-                semester_no = semester_no,
-                course_code = course_code,
-                course_name = course_name,
-                course_teacher = course_teacher,
-                credit = credit,
-                remarks =remarks,
-                ct_marks = ct_marks,
-                attendence_marks = attendence_marks,
-                total_ct_and_attendence_marks = total_ct_and_attendence_marks
-            )
-            data.save()
-            messages.success(request, 'CT and Attendence Mark Added Successfully!!!!')
-            return HttpResponseRedirect(f'/faculty/ct_and_attendence_mark/{course_code}/')
+            'ct_attend_marks': ct_attend_marks,
+            }
+        for student in students:
+            ct_marks = request.POST.get(f'{student.student_id}')
+            attend_marks = request.POST.get(f'{student.student_name}')
+            if ct_marks and attend_marks:
+                ct_marks = (int(ct_marks))
+                attend_marks = (int(attend_marks))
+                if ct_marks > 20 or attend_marks > 10:
+                    messages.warning(request, 'ct marks can not greater than 20 and attendence mark can not grater than 10')
+                    return HttpResponseRedirect(f'/faculty/ct_and_attendence_mark/{course_code}/')       
+            else:
+                ct_marks = 0
+                attend_marks = 0
+            student_id = student.student_id
+            student_name = student.student_name
+            session = student.session
+            semester_no = course.semister_no
+            course_code = course_code
+            course_name = course.course_name
+            course_teacher = course.course_teacher
+            credit = course.credit
+            remarks = student.remarks
+            ct_marks = ct_marks
+            attendence_marks = attend_marks
+            total_ct_and_attendence_marks = ct_marks + attendence_marks
+            checker = Attendence_and_CT_Mark.objects.filter(student_id= student_id, course_code=course_code, course_teacher= course.course_teacher)
+            flag = False
+            for c in checker:
+                id = c.id
+                data = Attendence_and_CT_Mark(id=id,student_id = student_id,student_name = student_name,session = session,semester_no = semester_no,course_code = course_code,course_name = course_name,course_teacher = course_teacher,credit = credit,remarks =remarks,ct_marks = ct_marks,attendence_marks = attendence_marks,total_ct_and_attendence_marks = total_ct_and_attendence_marks)
+                data.save()
+                flag = True
+            if flag == False:
+                data = Attendence_and_CT_Mark(
+                    student_id = student_id,
+                    student_name = student_name,
+                    session = session,
+                    semester_no = semester_no,
+                    course_code = course_code,
+                    course_name = course_name,
+                    course_teacher = course_teacher,
+                    credit = credit,
+                    remarks =remarks,
+                    ct_marks = ct_marks,
+                    attendence_marks = attendence_marks,
+                    total_ct_and_attendence_marks = total_ct_and_attendence_marks
+                    )
+                data.save()
+        messages.success(request,'CT and Attendence Mark Added Successfully!!!!')
+        return HttpResponseRedirect(f'/faculty/student_ct_and_attendence_mark/{course_code}/')  
+    return render(request, 'faculty/ct_and_attendence_mark.html', context)
+
+def student_ct_and_attendence_mark(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+    context = {
+        'course_code': course_code,
+        'course_name': course.course_name,
+        'credit': course.credit,
+        'semester_no': course.semister_no,
+        'course_teacher': course.course_teacher,
+        'student_ct_and_attend_marks': student_ct_and_attend_marks,
+    }
     return render(request, 'faculty/student_ct_and_attendence_mark.html', context)
+
+def edit_ct_and_attendence_mark(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+    context = {
+        'course_code': course_code,
+        'course_name': course.course_name,
+        'credit': course.credit,
+        'semester_no': course.semister_no,
+        'course_teacher': course.course_teacher,
+        'student_ct_and_attend_marks': student_ct_and_attend_marks,
+    }
+    if request.method == 'POST':
+        course = Course.objects.get(course_code= course_code)
+        students = Teacher_Student_Info.objects.filter(course_code= course_code)
+        ct_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+        context = {
+            'semister_no': course.semister_no,
+            'c_code': course_code,
+            'c_teacher': course.course_teacher,
+            'credit': course.credit,
+            'c_name': course.course_name,
+            'students': students,
+            'ct_attend_marks': ct_attend_marks,
+            }
+        for student in students:
+            ct_marks = request.POST.get(f'{student.student_id}')
+            attend_marks = request.POST.get(f'{student.student_name}')
+            if ct_marks and attend_marks:
+                ct_marks = (float(ct_marks))
+                attend_marks = (float(attend_marks))
+                if ct_marks > 20 or attend_marks > 10:
+                    messages.warning(request, 'ct marks can not greater than 20 and attendence mark can not grater than 10')
+                    return HttpResponseRedirect(f'/faculty/edit_ct_and_attendence_mark/{course_code}/')       
+            else:
+                ct_marks = 0
+                attend_marks = 0
+            student_id = student.student_id
+            student_name = student.student_name
+            session = student.session
+            semester_no = course.semister_no
+            course_code = course_code
+            course_name = course.course_name
+            course_teacher = course.course_teacher
+            credit = course.credit
+            remarks = student.remarks
+            ct_marks = ct_marks
+            attendence_marks = attend_marks
+            total_ct_and_attendence_marks = ct_marks + attendence_marks
+            checker = Attendence_and_CT_Mark.objects.filter(student_id= student_id, course_code=course_code, course_teacher= course.course_teacher)
+            flag = False
+            for c in checker:
+                id = c.id
+                data = Attendence_and_CT_Mark(id=id,student_id = student_id,student_name = student_name,session = session,semester_no = semester_no,course_code = course_code,course_name = course_name,course_teacher = course_teacher,credit = credit,remarks =remarks,ct_marks = ct_marks,attendence_marks = attendence_marks,total_ct_and_attendence_marks = total_ct_and_attendence_marks)
+                data.save()
+                flag = True
+            if flag == False:
+                data = Attendence_and_CT_Mark(
+                    student_id = student_id,
+                    student_name = student_name,
+                    session = session,
+                    semester_no = semester_no,
+                    course_code = course_code,
+                    course_name = course_name,
+                    course_teacher = course_teacher,
+                    credit = credit,
+                    remarks =remarks,
+                    ct_marks = ct_marks,
+                    attendence_marks = attendence_marks,
+                    total_ct_and_attendence_marks = total_ct_and_attendence_marks
+                    )
+                data.save()
+        messages.success(request,'CT and Attendence Mark Added Successfully!!!!')
+        return HttpResponseRedirect(f'/faculty/student_ct_and_attendence_mark/{course_code}/') 
+    return render(request, 'faculty/edit_ct_and_attendence_mark.html', context)
+

@@ -40,91 +40,68 @@
                 <h2 class="text-center">Mawlana Bhashani Science and Technology University</h2>
                 <h4 class="text-center">Santosh Tangail-1902</h4>
                 <h4 class="text-center">Department of Computer Science and Engineering</h4>
-                <h6 class="text-center">{{semister_no}} B.Sc. (Engg.) Final Examination, 202*</h6>
+                <h6 class="text-center">{{semester_no}} B.Sc. (Engg.) Final Examination, 202*</h6>
                 <div class="row mt-4">
                     <div class="col-4">
-                        <h6>Course Code: {{c_code}} </h6>
+                        <h6>Course Code: {{course_code}} </h6>
                     </div>
                     <div class="col-4">
                         <h6 class="credit-margin">Credit Hours: {{credit}}</h6>
                     </div>
                     <div class="col-4">
-                        <h6>Course Title: {{c_name}}</h6>
+                        <h6>Course Title: {{course_name}}</h6>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row mt-5">
-            <div class="col-9">
+            <div class="col-12">
                 <div class="row">
-                    <div class="col-9"><h5 class="mb-3">Name of the Examiner(s): {{c_teacher}} </h5></div>
+                    <div class="col-9"><h5 class="mb-3">Name of the Examiner(s): {{course_teacher}} </h5></div>
                     <div class="col-3"><h5 class="mb-3">Full Marks = 30</h5></div>
                 </div>
-            <table class="table table-bordered table-dark">
-                <thead>
+
+            <table class="table table-bordered">
+                <thead class="bg-dark text-white">
                   <tr>
                     <th scope="col">Student ID</th>
                     <th scope="col">Name of the Candidates</th>
                     <th scope="col">Class Attendence (10%)</th>
                     <th scope="col">Class Test/Assignment (20%)</th>
-                    <th scope="col">Total (30%)</th>
+                    <th scope="col">Total Mark (30%)</th>
                     <th scope="col">Remarks</th>
-                    <th>Add/Update Mark</th>
                   </tr>
                 </thead>
                 <tbody>
-                {% for student in students %}
+                {% for student in student_ct_and_attend_marks %}
                   <tr>
                     <td>{{student.student_id}}</td>
                     <td>{{student.student_name}}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td class="text-center">
+                        {{student.ct_marks}}
+                    </td>
+                    <td class="text-center">
+                        {{student.attendence_marks}}
+                    </td>
+                    <td class="text-center">
+                        {{student.total_ct_and_attendence_marks}}
+                    </td>
+                    
                     {% if student.remarks == 'BackLog' %}
                         <td class="text-danger">{{student.remarks}}</td>
                     {% else %}
                         <td>{{student.remarks}}</td>
                     {% endif %}
-                    <td><a href="{% url 'student_ct_and_attendence_mark' c_code student.student_id%}" class="btn btn-primary w-100">Add/Update</a></td>
                   </tr>
-                {% endfor %}
-                </tbody>
-              </table>
+                  {% endfor %}
+            </tbody>
+            </table>
+            <div class="row">
+                <a href={% url 'edit_ct_and_attendence_mark' course_code %} type="button" class="btn btn-warning">Edit</a>
             </div>
-            <div class="col-3">
-                {% if student %}
-                    <h5 class="text-center text-success" style="margin-top: 80px">Add CT and Attendence Mark</h5>
-                    <form action="" method="POST" class="mt-4">
-                        <h5 class="mt-2 mb-2">Student Name: {{student.first_name}} {{student.last_name}}</h5>
-                        <h5 class="mt-2 mb-5">Student Id: {{student.student_id}}</h5>
-                        {% csrf_token %}
-                        <div class="form-group mb-2">
-                            <label for="attendence_marks">Attendence Marks(10)<span class="text-danger">***</span></label>
-                            <input type="number" name="attendence_marks" class="form-control" id="attendence_marks" >
-                        </div>
-                        <div class="form-group">
-                            <label for="ct_marks">CT Marks(20) <span class="text-danger">***</span></label>
-                            <input type="number" name="ct_marks" class="form-control" id="ct_marks" >
-                        </div>
-                        <input type="submit" value="Submit" class="btn btn-success w-100 mt-3">
-                    </form>
-                {% endif %}
-            </div>
-
-            {% comment %} {% for student in students %}
-                <ul>
-                    <li>{{student.student_id}}</li>
-                    <li>{{student.student_name}}</li>
-                    <li>{{student.session}}</li>
-                    <li>{{student.semester}}</li>
-                    <li>{{student.course_code}}</li>
-                    <li>{{student.course_name}}</li>
-                    <li>{{student.credit}}</li>
-                    <li>{{student.teacher}}</li>
-                </ul>
-            {% endfor %} {% endcomment %}
-        </div>
+        </div>  
     </div>
+</div>
 {% endblock content2 %}
 
 

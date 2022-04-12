@@ -56,6 +56,7 @@ class Running_Semester(models.Model):
         max_length= 100,
         default='2016-17',
     )
+    batch_number = models.IntegerField(default=1)
 
 class Roll_Sheet(models.Model):
     session = models.CharField(max_length=150)
@@ -85,3 +86,11 @@ class Teacher_Student_Info(models.Model):
         choices= semister,
         default= '3rd Year 1st Semester',
     )
+
+class Registration_By_Semester(models.Model):
+    session = models.CharField(max_length=150)
+    student_id = models.CharField(max_length=150)
+    name_of_the_candidates = models.CharField(max_length=150)
+    hall = models.CharField(max_length=160)
+    semester_name = models.CharField(max_length=30)
+    remarks = models.CharField(max_length=150)

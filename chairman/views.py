@@ -1,10 +1,11 @@
+from tkinter.tix import Tree
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, PasswordChangeForm
 from django.contrib.auth import logout, update_session_auth_hash
 from django.contrib import messages
 from authentication.models import *
 from chairman.forms import CourseForm, Running_Semester_Form
-from chairman.models import Course, Roll_Sheet, Running_Semester, Teacher_Student_Info
+from chairman.models import Course, Roll_Sheet, Running_Semester, Teacher_Student_Info, Registration_By_Semester
 from authentication.forms import StudentRegForm, TeacherRegForm, OfficeStuffRegForm
 
 # Create your views here.
@@ -199,10 +200,62 @@ def add_semesters(request):
         return HttpResponseRedirect('/')
 
 def show_roll_sheet(request, semester_no= '1st Year 1st Semester'):
-    all_students = Teacher_Student_Info.objects.filter(semester= semester_no)
+    students_regular = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'Regular')
+    students_backlog = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'BackLog')
+    students_special = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'Special')
     course_codes = Course.objects.filter(semister_no= semester_no)
-    students = Student.objects.all()
+    individual_student_c_codes = Teacher_Student_Info.objects.filter(semester= semester_no)
+    backLog_students_and_courses = {}
+    special_students_and_courses = {}
     count =0
     for c in course_codes:
         count+=1
-    return render(request, 'chairman/show_roll_sheet.html', {'all_students': all_students, 'course_codes': course_codes, 'semester_no': semester_no, 'count': count, 'students': students})
+    
+    #backlog students and courses 
+    for student in students_backlog:
+        mylist = []
+        for code in individual_student_c_codes:
+            if student.student_id == code.student_id:
+                mylist.append(code.course_code)
+        final_list = []
+        for c in course_codes:
+            flag = False
+            for l in mylist:
+                if c.course_code == l:
+                    flag = True
+            if flag == True:
+                final_list.append(c.course_code)
+            else:
+                final_list.append(" ")
+        backLog_students_and_courses[student] = final_list
+
+    #specail students and courses
+    for student in students_special:
+        mylist = []
+        for code in individual_student_c_codes:
+            if student.student_id == code.student_id:
+                mylist.append(code.course_code)
+        final_list = []
+        for c in course_codes:
+            flag = False
+            for l in mylist:
+                if c.course_code == l:
+                    flag = True
+            if flag == True:
+                final_list.append(c.course_code)
+            else:
+                final_list.append(" ")
+        special_students_and_courses[student] = final_list
+
+    context = {
+            'students_backlog':students_backlog,
+            'students_regular': students_regular, 
+            'course_codes': course_codes, 
+            'semester_no': semester_no, 
+            'count': count, 
+            'individual_student_c_codes': individual_student_c_codes, 
+            'backLog_students_and_courses': backLog_students_and_courses,
+            'special_students_and_courses': special_students_and_courses,
+            }
+  
+    return render(request, 'chairman/show_roll_sheet.html', context)
