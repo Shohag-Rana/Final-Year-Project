@@ -1,5 +1,3 @@
-from ast import Not
-from numpy import save
 from authentication.models import *
 from django.contrib import messages
 from django.shortcuts import render, HttpResponseRedirect, HttpResponse
