@@ -1,4 +1,3 @@
-from urllib import request
 from django.shortcuts import render, HttpResponseRedirect
 from . models import Student, Teacher, Teacher_email, UserManager, OfficeStuff
 from . forms import StudentRegForm, LoginForm, TeacherRegForm, OfficeStuffRegForm
@@ -33,23 +32,23 @@ def student_signup(request):
                 if (student_id[0] != 'C' and student_id[1] != 'E'):
                     messages.info(request, 'Please enter the valid student id')
                     return HttpResponseRedirect('/auth/student_signup/')
-                # user = fm.save(commit=False)
-                # user.is_active = False
-                # user.save()
-                # current_site = get_current_site(request)
-                # mail_subject = 'Activate your account'
-                # message = render_to_string('authentication/account.html', {
-                #     'user': user,
-                #     'domain': current_site.domain,
-                #     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                #     'token': default_token_generator.make_token(user),
-                # })
-                # send_mail = fm.cleaned_data.get('email')
-                # email = EmailMessage(mail_subject, message, to=[send_mail])
-                # email.send()
+                user = fm.save(commit=False)
+                user.is_active = False
+                user.save()
+                current_site = get_current_site(request)
+                mail_subject = 'Activate your account'
+                message = render_to_string('authentication/account.html', {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': default_token_generator.make_token(user),
+                })
+                send_mail = fm.cleaned_data.get('email')
+                email = EmailMessage(mail_subject, message, to=[send_mail])
+                email.send()
                 fm.save()
                 messages.success(request, 'Successfully created account')
-                # messages.success(request, 'Activate your account from email')
+                messages.success(request, 'Activate your account from email')
                 return HttpResponseRedirect('/auth/login/')
         else:
             fm = StudentRegForm()
@@ -58,7 +57,6 @@ def student_signup(request):
         return HttpResponseRedirect('/')
 
 # # activate your account
-
 
 def activate(request, uidb64, token):
     try:
@@ -77,8 +75,6 @@ def activate(request, uidb64, token):
         return HttpResponseRedirect('/')
 
 # login
-
-
 def user_login(request):
     if not request.user.is_authenticated:
         if request.method == "POST":
@@ -118,32 +114,9 @@ def user_login(request):
 
 # logout
 
-
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/auth/login/')
-
-
-# def course_registration(request, semester_no="1st Year 1st Semester"):
-#     if request.user.is_authenticated:
-#         user = Student.objects.get(id=request.user.id)
-#         regular_courses = Course.objects.filter(semister_no=semester_no)
-#         course_name = []
-#         if request.method == 'POST':
-#             for courseName in regular_courses:
-#                 course_name.append(courseName.course_code)
-#             studentId = user.student_id
-#             studentName = user.username
-#             courses = course_name
-#             session = user.session
-#             data = CourseRegistration(
-#                 studentId=studentId, studentName=studentName, courses=courses, session=session)
-#             data.save()
-#             messages.success(request, "Course Registration Successfull!!!")
-#         return render(request, 'authentication/profile.html', {'user': user, 'regular_courses': regular_courses})
-#     else:
-#         return HttpResponseRedirect('/auth/login/')
-
 
 def check_mail(request):
     return render(request, 'authentication/gmailMessage.html')

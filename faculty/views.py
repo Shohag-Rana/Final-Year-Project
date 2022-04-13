@@ -349,3 +349,54 @@ def edit_ct_and_attendence_mark(request, course_code):
         return HttpResponseRedirect(f'/faculty/student_ct_and_attendence_mark/{course_code}/') 
     return render(request, 'faculty/edit_ct_and_attendence_mark.html', context)
 
+def detailed_mark_sheet(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="special").order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
+    if request.method == 'POST':
+        for student in regular_students:
+            q1 = request.POST.get(f'question1_{student.student_id}')
+            if q1:
+                print(int(q1))
+            q2 = request.POST.get(f'question2_{student.student_id}')
+            if q2:
+                print(int(q2))
+            q3 = request.POST.get(f'question3_{student.student_id}')
+            if q3:
+                print(int(q3))
+            q4 = request.POST.get(f'question4_{student.student_id}')
+            if q4:
+                print(int(q4))
+            q5 = request.POST.get(f'question5_{student.student_id}')
+            if q5:
+                print(int(q5))
+            q6 = request.POST.get(f'question6_{student.student_id}')
+            if q6:
+                print(int(q6))
+            q7 = request.POST.get(f'question7_{student.student_id}')
+            if q7:
+                print(int(q7))
+            q8 = request.POST.get(f'question8_{student.student_id}')
+            if q8:
+                print(int(q8))
+            q9 = request.POST.get(f'question9_{student.student_id}')
+            if q9:
+                print(int(q9))
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_students': regular_students,
+        'backLogStudents': backLogStudents,
+        'special_students': special_students,
+        }
+    return render(request, 'faculty/detailed_mark_sheet.html', context)
