@@ -90,13 +90,13 @@ thead{
 
                         {% for student, courseCodes in backLog_students_and_courses.items %}
                         <tr>
-                            <td style="font-size: 13px">{{forloop.counter}}</td>
+                            <td style="font-size: 13px">{{courseCodes.index}}</td>
                             <td style="font-size: 13px">{{student.session}}</td>
                             <td style="font-size: 13px">{{student.student_id}}</td>
                             <td style="font-size: 13px">{{student.name_of_the_candidates}}</td>
                             <td style="font-size: 13px">{{student.hall}}</td>
                             
-                            {% for code in courseCodes %}
+                            {% for code in courseCodes.course_list %}
                                 {% if code == " " %}
                                     <td style="font-size: 13px">-</td>
                                 {% else %}

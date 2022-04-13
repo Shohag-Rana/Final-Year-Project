@@ -334,7 +334,7 @@ def student_special_course_registration(request):
                 total_credit += credit
         if total_credit > 30:
             messages.warning(request, 'You can not take more than 30 Credits!!!')
-            return HttpResponseRedirect('/student/special_course_registration/')
+            return HttpResponseRedirect('/student/student_special_course_registration/')
 
         for b_course in backLogCourses:
             course = request.POST.get(f'{b_course.course_code}')

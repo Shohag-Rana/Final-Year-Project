@@ -200,9 +200,9 @@ def add_semesters(request):
         return HttpResponseRedirect('/')
 
 def show_roll_sheet(request, semester_no= '1st Year 1st Semester'):
-    students_regular = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'Regular')
-    students_backlog = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'BackLog')
-    students_special = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'Special')
+    students_regular = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'Regular').order_by('student_id')
+    students_backlog = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'BackLog').order_by('student_id')
+    students_special = Registration_By_Semester.objects.filter(semester_name= semester_no, remarks= 'Special').order_by('student_id')
     course_codes = Course.objects.filter(semister_no= semester_no)
     individual_student_c_codes = Teacher_Student_Info.objects.filter(semester= semester_no)
     backLog_students_and_courses = {}
@@ -210,7 +210,9 @@ def show_roll_sheet(request, semester_no= '1st Year 1st Semester'):
     count =0
     for c in course_codes:
         count+=1
-    
+    student_count = 0
+    for cnt in students_regular:
+        student_count += 1
     #backlog students and courses 
     for student in students_backlog:
         mylist = []
@@ -227,7 +229,8 @@ def show_roll_sheet(request, semester_no= '1st Year 1st Semester'):
                 final_list.append(c.course_code)
             else:
                 final_list.append(" ")
-        backLog_students_and_courses[student] = final_list
+        student_count += 1
+        backLog_students_and_courses[student] = {'course_list': final_list, 'index': student_count}
 
     #specail students and courses
     for student in students_special:
@@ -248,14 +251,14 @@ def show_roll_sheet(request, semester_no= '1st Year 1st Semester'):
         special_students_and_courses[student] = final_list
 
     context = {
-            'students_backlog':students_backlog,
-            'students_regular': students_regular, 
-            'course_codes': course_codes, 
-            'semester_no': semester_no, 
-            'count': count, 
-            'individual_student_c_codes': individual_student_c_codes, 
-            'backLog_students_and_courses': backLog_students_and_courses,
-            'special_students_and_courses': special_students_and_courses,
-            }
+        'students_backlog':students_backlog,
+        'students_regular': students_regular, 
+        'course_codes': course_codes, 
+        'semester_no': semester_no, 
+        'count': count, 
+        'individual_student_c_codes': individual_student_c_codes, 
+        'backLog_students_and_courses': backLog_students_and_courses,
+        'special_students_and_courses': special_students_and_courses,
+        }
   
     return render(request, 'chairman/show_roll_sheet.html', context)

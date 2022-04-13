@@ -10,6 +10,19 @@
 .course-margin{
     margin-left: 120px;
 }
+td{
+    border: 1px solid black;
+}
+tr{
+    border-bottom: 1px solid black;
+}
+th{
+    border: 2px solid black !important;
+    border-top: 2px solid black !important;
+}
+input[type=number]{
+    border: 1px solid #8d8dc1;
+}
 {% endblock mystyle %}
    
 {% block title %} Attendence sheet {% endblock title %} 
@@ -63,8 +76,9 @@
             <form action="" method="POST">
                 {% csrf_token %}
                 <table class="table table-bordered">
-                    <thead class="bg-dark text-white">
+                    <thead>
                         <tr>
+                            <th scope="col">SI</th>
                             <th scope="col">Student ID</th>
                             <th scope="col">Name of the Candidates</th>
                             <th scope="col">Class Attendence (10%)</th>
@@ -73,8 +87,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for student in student_ct_and_attend_marks %}
+                    {% for student in regular_student_ct_and_attend_marks %}
                         <tr>
+                            <td>{{forloop.counter}}</td>
                             <td>{{student.student_id}}</td>
                             <td>{{student.student_name}}</td>
                             <td>
@@ -100,6 +115,75 @@
                                 {% endif %}
                             </td>
                             {% if student.remarks == 'BackLog' %}
+                                <td class="text-danger">{{student.remarks}}</td>
+                            {% else %}
+                                <td>{{student.remarks}}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    {% for student, count in backLogStudents.items %}
+                    <tr>
+                        <td>{{count}}</td>
+                        <td>{{student.student_id}}</td>
+                        <td>{{student.student_name}}</td>
+                        <td>
+                            {% if student.attendence_marks == 0 %}
+                            <div class="form-group">
+                                <input type="number" name="{{student.student_name}}" class="form-control">
+                            </div>
+                            {% else %}
+                            <div class="form-group">
+                                <input type="number" name="{{student.student_name}}" value={{student.attendence_marks}} class="form-control">
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if student.ct_marks == 0 %}
+                            <div class="form-group">
+                                <input type="number" name="{{student.student_id}}" class="form-control">
+                            </div>
+                            {% else %}
+                            <div class="form-group">
+                                <input type="number" name="{{student.student_id}}" value={{student.ct_marks}} class="form-control">
+                            </div>
+                            {% endif %}
+                        </td>
+                        {% if student.remarks == 'BackLog' %}
+                            <td class="text-danger">{{student.remarks}}</td>
+                        {% else %}
+                            <td>{{student.remarks}}</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+
+                    {% for student in special_student_ct_and_attend_marks %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{student.student_id}}</td>
+                            <td>{{student.student_name}}</td>
+                            <td>
+                                {% if student.attendence_marks == 0 %}
+                                <div class="form-group">
+                                    <input type="number" name="{{student.student_name}}" class="form-control">
+                                </div>
+                                {% else %}
+                                <div class="form-group">
+                                    <input type="number" name="{{student.student_name}}" value={{student.attendence_marks}} class="form-control">
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if student.ct_marks == 0 %}
+                                <div class="form-group">
+                                    <input type="number" name="{{student.student_id}}" class="form-control">
+                                </div>
+                                {% else %}
+                                <div class="form-group">
+                                    <input type="number" name="{{student.student_id}}" value={{student.ct_marks}} class="form-control">
+                                </div>
+                                {% endif %}
+                            </td>
+                            {% if student.remarks == 'Special' %}
                                 <td class="text-danger">{{student.remarks}}</td>
                             {% else %}
                                 <td>{{student.remarks}}</td>

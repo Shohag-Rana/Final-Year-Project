@@ -1,4 +1,5 @@
 
+from multiprocessing import context
 from tokenize import Number
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
@@ -73,46 +74,96 @@ def faculty_pswreset2(request):
 
 def current_course(request):
     if request.user.is_authenticated:
+        all_semesters = ['1st Year 1st Semester', '1st Year 2nd Semester',
+                        '2nd Year 1st Semester', '2nd Year 2nd Semester', '3rd Year 1st Semester',
+                        '3rd Year 2nd Semester', '4th Year 1st Semester', '4th Year 2nd Semester']
         user = request.user
         faculty = Teacher.objects.filter(email= request.user)
         courses = Course.objects.filter(course_teacher = user)
-        return render(request, 'faculty/current_course.html', {'courses': courses, 'faculty': faculty})
+        all_semester_list = []
+        for semester in all_semesters:
+            c_list = []
+            flag = False
+            for course in courses:
+                if semester == course.semister_no:
+                    c_list.append(course.course_code)
+                    flag = True
+            if flag == True:
+                all_semester_list.append(semester)
+        context = {
+            'courses': courses, 
+            'faculty': faculty, 
+            'all_semesters': all_semester_list,
+            }
+        return render(request, 'faculty/current_course.html', context)
     else:
         return HttpResponseRedirect('/')
 
 def course_details(request, course_code):
-    students = Teacher_Student_Info.objects.filter(course_code = course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Special').order_by('student_id')
     course = Course.objects.get(course_code= course_code)
     c_code = (course.course_code)
     c_name = (course.course_name)
     c_credit = (course.credit)
     c_teacher = course.course_teacher
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
     context = {
         'c_code': c_code,
         'c_name': c_name,
         'c_credit': c_credit,
-        'students': students,
+        'regular_students': regular_students,
         'c_teacher': c_teacher,
+        'backLogStudents': backLogStudents,
+        'special_students': special_students,
     }
     return render(request, 'faculty/course_details.html', context)
 
 def attendence_sheet(request, course_code):
     course = Course.objects.get(course_code= course_code)
-    students = Teacher_Student_Info.objects.filter(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
+    print(backLogStudents)
     context = {
         'semister_no': course.semister_no,
         'c_code': course_code,
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'students': students,
+        'regular_students': regular_students,
+        'backLogStudents': backLogStudents,
+        'special_students': special_students,
     }
     return render(request, 'faculty/attendence_sheet.html', context)
 
 def ct_and_attendence_mark(request, course_code):
     course = Course.objects.get(course_code= course_code)
-    students = Teacher_Student_Info.objects.filter(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks= 'Regular').order_by('student_id')
     ct_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
     for check in ct_attend_marks:
         return HttpResponseRedirect(f'/faculty/edit_ct_and_attendence_mark/{course_code}/') 
     context = {
@@ -121,8 +172,10 @@ def ct_and_attendence_mark(request, course_code):
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'students': students,
+        'regular_students': regular_students,
         'ct_attend_marks': ct_attend_marks,
+        'backLogStudents': backLogStudents,
+        'special_students': special_students,
         }
     if request.method == 'POST':
         course = Course.objects.get(course_code= course_code)
@@ -190,27 +243,49 @@ def ct_and_attendence_mark(request, course_code):
 
 def student_ct_and_attendence_mark(request, course_code):
     course = Course.objects.get(course_code= course_code)
-    student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+    regular_student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_student_ct_and_attend_marks:
+        count += 1
+    for stu in backLog_student_ct_and_attend_marks:
+        count += 1
+        backLogStudents[stu] = count
     context = {
         'course_code': course_code,
         'course_name': course.course_name,
         'credit': course.credit,
         'semester_no': course.semister_no,
         'course_teacher': course.course_teacher,
-        'student_ct_and_attend_marks': student_ct_and_attend_marks,
+        'regular_student_ct_and_attend_marks': regular_student_ct_and_attend_marks,
+        'backLogStudents': backLogStudents,
+        'special_student_ct_and_attend_marks': special_student_ct_and_attend_marks,
     }
     return render(request, 'faculty/student_ct_and_attendence_mark.html', context)
 
 def edit_ct_and_attendence_mark(request, course_code):
     course = Course.objects.get(course_code= course_code)
-    student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
+    regular_student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_student_ct_and_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_student_ct_and_attend_marks:
+        count += 1
+    for stu in backLog_student_ct_and_attend_marks:
+        count += 1
+        backLogStudents[stu] = count
     context = {
         'course_code': course_code,
         'course_name': course.course_name,
         'credit': course.credit,
         'semester_no': course.semister_no,
         'course_teacher': course.course_teacher,
-        'student_ct_and_attend_marks': student_ct_and_attend_marks,
+        'regular_student_ct_and_attend_marks': regular_student_ct_and_attend_marks,
+        'backLogStudents': backLogStudents,
+        'special_student_ct_and_attend_marks': special_student_ct_and_attend_marks,
     }
     if request.method == 'POST':
         course = Course.objects.get(course_code= course_code)

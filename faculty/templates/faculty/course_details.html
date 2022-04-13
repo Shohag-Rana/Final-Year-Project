@@ -54,7 +54,7 @@
               </tr>
             </thead>
             <tbody>
-                {% for student in students %}
+                {% for student in regular_students %}
                 <tr>
                     <td>{{forloop.counter}}</td>
                     <td>{{student.student_id}}</td>
@@ -67,6 +67,40 @@
                       <td class="text-danger"><b>{{student.remarks}}</b></td>
                     {% else %}
                       <td>{{student.remarks}}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+
+                {% for student, count in backLogStudents.items %}
+                <tr>
+                    <td>{{count}}</td>
+                    <td>{{student.student_id}}</td>
+                    <td>{{student.student_name}}</td>
+                    <td>{{student.session}}</td>
+                    <td>{{student.hall}}</td>
+                    <td>{{student.course_code}}</td>
+                    <td>{{student.credit}}</td>
+                    {% if student.remarks == 'BackLog' %}
+                      <td class="text-danger"><b>{{student.remarks}}</b></td>
+                    {% else %}
+                      <td>{{student.remarks}}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+
+                {% for student in special_students %}
+                <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{student.student_id}}</td>
+                    <td>{{student.student_name}}</td>
+                    <td>{{student.session}}</td>
+                    <td>{{student.hall}}</td>
+                    <td>{{student.course_code}}</td>
+                    <td>{{student.credit}}</td>
+                    {% if student.remarks == 'BackLog' %}
+                      <td class="text-danger"><b>{{student.remarks}}</b></td>
+                    {% else %}
+                      <td class="text-danger"><b>{{student.remarks}}</b></td>
                     {% endif %}
                 </tr>
                 {% endfor %}

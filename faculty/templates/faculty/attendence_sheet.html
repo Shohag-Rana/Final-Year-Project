@@ -10,6 +10,16 @@
 .course-margin{
     margin-left: 120px;
 }
+td{
+    border: 1px solid black;
+}
+tr{
+    border-bottom: 1px solid black;
+}
+th{
+    border: 2px solid black !important;
+    border-top: 2px solid black !important;
+}
 {% endblock mystyle %}
    
 {% block title %} Attendence sheet {% endblock title %} 
@@ -56,7 +66,7 @@
         </div>
         <div class="row mt-5">
             <h4 class="mb-3">Course Teacher: {{c_teacher}}</h4>
-            <table class="table table-bordered table-dark">
+            <table class="table table-bordered">
                 <thead>
                   <tr>
                     <th scope="col">SL.</th>
@@ -67,16 +77,30 @@
                   </tr>
                 </thead>
                 <tbody>
-                {% for student in students %}
+                {% for student in regular_students %}
                   <tr>
                     <td>{{forloop.counter}}</td>
                     <td>{{student.student_id}}</td>
                     <td>{{student.student_name}}</td>
-                    {% if student.remarks == 'BackLog' %}
+                    <td>{{student.remarks}}</td>
+                    <td></td>
+                  </tr>
+                {% endfor %}
+                {% for student, count in backLogStudents.items %}
+                    <tr>
+                        <td>{{count}}</td>
+                        <td>{{student.student_id}}</td>
+                        <td>{{student.student_name}}</td>
                         <td class="text-danger">{{student.remarks}}</td>
-                    {% else %}
-                        <td>{{student.remarks}}</td>
-                    {% endif %}
+                        <td></td>
+                    </tr>
+                {% endfor %}
+                {% for student in special_students %}
+                  <tr>
+                    <td>{{forloop.counter}}</td>
+                    <td>{{student.student_id}}</td>
+                    <td>{{student.student_name}}</td>
+                    <td>{{student.remarks}}</td>
                     <td></td>
                   </tr>
                 {% endfor %}
