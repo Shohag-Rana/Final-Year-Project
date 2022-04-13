@@ -52,6 +52,14 @@
       background-color: gray;
       color: black;
   }
+  .item-style{
+    border-top: 1px solid black !important;
+    border-left: 1px solid black !important;
+    border-right: 1px solid black !important;
+}
+.item-style:last-child{
+  border-bottom: 1px solid black !important;
+}
 {% endblock mystyle %}
     
    
@@ -151,7 +159,7 @@
             <div class="mt-4 mb-4">
                 <div class="accordion" id="myAccordion">
                     {% for semester in backLogSemester %}
-                    <div class="accordion-item">
+                    <div class="accordion-item item-style">
                         <h2 class="accordion-header" id="heading_{{forloop.counter}}">
                             <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse_{{forloop.counter}}">{{semester}}</button>									
                         </h2>

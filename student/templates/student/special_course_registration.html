@@ -52,6 +52,14 @@
       background-color: gray;
       color: black;
   }
+  .item-style{
+      border-top: 1px solid black !important;
+      border-left: 1px solid black !important;
+      border-right: 1px solid black !important;
+  }
+  .item-style:last-child{
+    border-bottom: 1px solid black !important;
+  }
 {% endblock mystyle %}
     
    
@@ -76,7 +84,7 @@
  {% endblock content1 %}
  
 {% block content2 %}
-  <div class="row">
+  <div class="row p-2">
         <div class="col-lg-3 col-md-4 col-sm-12 mb-3 mr-5">
             <div class="container">
             <div class="card" style="width: 18rem;">
@@ -125,7 +133,7 @@
                 </div>
                 <div class="accordion" id="myAccordion">
                     {% for semester in backLogSemester %}
-                    <div class="accordion-item">
+                    <div class="accordion-item item-style">
                         <h2 class="accordion-header" id="heading_{{forloop.counter}}">
                             <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse_{{forloop.counter}}">{{semester.semester_no}}</button>									
                         </h2>
@@ -167,7 +175,7 @@
                 </div>
                 <div class="accordion" id="myAccordion2">
                     {% for semester in specialSemester %}
-                    <div class="accordion-item">
+                    <div class="accordion-item item-style">
                         <h2 class="accordion-header" id="heading_{{forloop.counter0}}">
                             <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse_{{forloop.counter0}}">{{semester}}</button>									
                         </h2>

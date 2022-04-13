@@ -78,8 +78,12 @@ def current_courses(request):
         student = Student.objects.get(email= request.user)
         k = student.session
         running_semester = Running_Semester.objects.filter(session= k)
+        flag = False
         for r in running_semester:
             semester = r.semester_no
+            flag = True
+        if flag == False:
+            return HttpResponse('You are special student')
         courses = Course.objects.filter(semister_no = semester)
         return render(request, 'student/current_courses.html', {'courses': courses, 'student':student})
     else:
@@ -89,6 +93,12 @@ def complete_courses(request):
     student = Student.objects.get(email= request.user)
     k = student.session
     running_semester = Running_Semester.objects.filter(session= k)
+    flag = False
+    for r in running_semester:
+        semester = r.semester_no
+        flag = True
+    if flag == False:
+        return HttpResponse('You are special student')
     for r in running_semester:
         semester = r.semester_no
     if semester == '4th Year 2nd Semester':
