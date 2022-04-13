@@ -1,4 +1,3 @@
-from tkinter.tix import Tree
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm, PasswordChangeForm
 from django.contrib.auth import logout, update_session_auth_hash
