@@ -1,5 +1,5 @@
 from django.contrib import admin
-from authentication.models import Student, User, Teacher, Teacher_email, OfficeStuff
+from authentication.models import Student, User, Teacher, Teacher_email, OfficeStuff, ExamController, ExamCommitte
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 # Register your models here.
 class UserModelAdmin(BaseUserAdmin):
@@ -41,3 +41,12 @@ class Teacher_email_ModelAdmin(admin.ModelAdmin):
 @admin.register(OfficeStuff)
 class OfficeStuff_ModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'email']
+
+@admin.register(ExamController)
+class ExamController_ModelAdmin(admin.ModelAdmin):
+    list_display = ['id', 'email']
+
+@admin.register(ExamCommitte)
+class ExamCommitte_ModelAdmin(admin.ModelAdmin):
+    list_display = ['id', 'email']
+

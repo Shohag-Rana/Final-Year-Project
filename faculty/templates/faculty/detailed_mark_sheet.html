@@ -79,7 +79,7 @@ input[type=number]{
                 <table class="table table-bordered">
                     <thead>
                         <tr class="text-center">
-                            <th scope="col">SI</th>
+                            <th scope="col">SI No</th>
                             <th scope="col">Student ID</th>
                             <th scope="col">1</th>
                             <th scope="col">2</th>
@@ -90,7 +90,7 @@ input[type=number]{
                             <th scope="col">7</th>
                             <th scope="col">8</th>
                             <th scope="col">9</th>
-                            <th scope="col">Total</th>
+                            <th scope="col">Total Marks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -98,15 +98,15 @@ input[type=number]{
                         <tr>
                             <td>{{forloop.counter}}</td>
                             <td>{{student.student_id}}</td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question1_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question2_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question3_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question4_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question5_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question6_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question7_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question8_{{student.student_id}}" class="form-control"></div></td>
-                            <td><div class="form-group"><input max= "10" type="number" name="question9_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question1_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question2_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question3_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question4_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question5_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question6_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question7_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question8_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question9_{{student.student_id}}" class="form-control"></div></td>
                             <td></td>
                         </tr>
                     {% endfor %}
@@ -124,6 +124,22 @@ input[type=number]{
                             <td><div class="form-group"><input max= "10" type="number" name="question7_{{student.student_id}}" class="form-control"></div></td>
                             <td><div class="form-group"><input max= "10" type="number" name="question8_{{student.student_id}}" class="form-control"></div></td>
                             <td><div class="form-group"><input max= "10" type="number" name="question9_{{student.student_id}}" class="form-control"></div></td>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    {% for student in special_students %}
+                        <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>{{student.student_id}}</td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question1_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question2_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question3_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question4_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question5_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question6_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question7_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question8_{{student.student_id}}" class="form-control"></div></td>
+                            <td><div class="form-group"><input max= "10" min= "0" type="number" name="question9_{{student.student_id}}" class="form-control"></div></td>
                             <td></td>
                         </tr>
                     {% endfor %}

@@ -10,7 +10,8 @@ urlpatterns = [
    	path('gmail/', views.check_mail, name= 'mail'),
     path('teacher_signup/', views.teacher_signup, name= "teacher_signup"),
     path('office_stuff_signup/', views.office_stuff_signup, name= "office_stuff_signup"),
-    
+    path('exam_controller/', views.exam_controller, name= "exam_controller"),
+    path('exam_committe/', views.exam_committe, name= "exam_committe"),
 
 #     # email verification
     path('activate/<uidb64>/<token>/', views.activate, name= "activate"),

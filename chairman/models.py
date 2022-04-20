@@ -45,6 +45,9 @@ class Course(models.Model):
         )
     course_teacher = models.ForeignKey(Teacher, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return self.course_name
+
 class Running_Semester(models.Model):
     semester_no = models.CharField(
         max_length=120,

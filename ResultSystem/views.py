@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponseRedirect
-from authentication.models import Student, Teacher, OfficeStuff
+from authentication.models import Student, Teacher, OfficeStuff, ExamController, ExamCommitte
 
 def home_page(request):
 	if not request.user.is_authenticated:
@@ -13,4 +13,8 @@ def home_page(request):
 			return HttpResponseRedirect('/faculty/profile/')
 		if (OfficeStuff.objects.filter(email= request.user)):
 			return HttpResponseRedirect('/stuff/profile/')
+		if (ExamController.objects.filter(email= request.user)):
+			return HttpResponseRedirect('/exam_controller/profile/')
+		if (ExamCommitte.objects.filter(email= request.user)):
+			return HttpResponseRedirect('/examcommitte/profile/')
 

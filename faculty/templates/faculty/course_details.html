@@ -36,7 +36,9 @@
         <div class="col-3">
           <a href={% url 'attendence_sheet' c_code %} type="button" class="btn btn-primary w-100 mt-5 text-center">Attendence Sheet</a>
           <a href={% url 'ct_and_attendence_mark' c_code %} type="button" class="btn btn-primary w-100 mt-2 text-center">Add CT and Attendence Mark</a>
-          <a href={% url 'detailed_mark_sheet' c_code %} type="button" class="btn btn-primary w-100 mt-2 text-center">Detailed MarkSheet</a>
+          <a href={% url 'Theory_mark_sheet' c_code %} type="button" class="btn btn-primary w-100 mt-2 text-center">Theory Marks</a>
+          <a href={% url 'consolidated_marks_sheet' c_code %} type="button" class="btn btn-primary w-100 mt-2 text-center">Consolidated Marks Sheet</a>
+          <a href={% url 'send_to_controller_theory_marks' c_code %} type="button" class="btn btn-primary w-100 mt-2 text-center">Send to Controller Marks Sheet</a>
         </div>
     </div>
     <div class="row">

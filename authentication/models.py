@@ -134,10 +134,14 @@ class OfficeStuff(User):
     mobile_number = models.CharField(max_length=100, default='Not Interested')
     user_type = models.CharField(max_length= 100, default="stuff")
 
-# class CourseRegistration(models.Model):
-#     studentId = models.CharField(max_length=100)
-#     studentName = models.CharField(max_length= 200)
-#     courses = models.CharField(max_length= 1000)
-#     session = models.CharField(max_length=100)
-#     examine = models.CharField(max_length= 100, default="Md. Hadifur Rahman")
-#     remarks = models.BooleanField(default= False)
+class ExamController(User):
+    profile_img = models.URLField(default="https://i.ibb.co/S5cx8vv/R-1.jpg")  
+    mobile_number = models.CharField(max_length=100, default='Not Interested')
+    user_type = models.CharField(max_length= 100, default="exam_controller")
+
+class ExamCommitte(User):
+    profile_img = models.URLField(default="https://i.ibb.co/S5cx8vv/R-1.jpg") 
+    mobile_number = models.CharField(max_length=100, default='Not Interested')
+    user_type = models.CharField(max_length= 100, default="ExamCommitte")
+    def __str__(self):
+        return self.first_name + " "+ self.last_name

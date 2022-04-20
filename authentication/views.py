@@ -1,6 +1,6 @@
 from django.shortcuts import render, HttpResponseRedirect
-from . models import Student, Teacher, Teacher_email, UserManager, OfficeStuff
-from . forms import StudentRegForm, LoginForm, TeacherRegForm, OfficeStuffRegForm
+from . models import ExamController, Student, Teacher, Teacher_email, UserManager, OfficeStuff
+from . forms import StudentRegForm, LoginForm, TeacherRegForm, OfficeStuffRegForm, ExamControllerRegForm, ExamCommitteRegForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
@@ -32,23 +32,23 @@ def student_signup(request):
                 if (student_id[0] != 'C' and student_id[1] != 'E'):
                     messages.info(request, 'Please enter the valid student id')
                     return HttpResponseRedirect('/auth/student_signup/')
-                user = fm.save(commit=False)
-                user.is_active = False
-                user.save()
-                current_site = get_current_site(request)
-                mail_subject = 'Activate your account'
-                message = render_to_string('authentication/account.html', {
-                    'user': user,
-                    'domain': current_site.domain,
-                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-                    'token': default_token_generator.make_token(user),
-                })
-                send_mail = fm.cleaned_data.get('email')
-                email = EmailMessage(mail_subject, message, to=[send_mail])
-                email.send()
-                fm.save()
-                messages.success(request, 'Successfully created account')
-                messages.success(request, 'Activate your account from email')
+                # user = fm.save(commit=False)
+                # user.is_active = False
+                # user.save()
+                # current_site = get_current_site(request)
+                # mail_subject = 'Activate your account'
+                # message = render_to_string('authentication/account.html', {
+                #     'user': user,
+                #     'domain': current_site.domain,
+                #     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                #     'token': default_token_generator.make_token(user),
+                # })
+                # send_mail = fm.cleaned_data.get('email')
+                # email = EmailMessage(mail_subject, message, to=[send_mail])
+                # email.send()
+                # fm.save()
+                # messages.success(request, 'Successfully created account')
+                # messages.success(request, 'Activate your account from email')
                 return HttpResponseRedirect('/auth/login/')
         else:
             fm = StudentRegForm()
@@ -85,6 +85,7 @@ def user_login(request):
                 user = authenticate(email=mail, password=psw)
                 if user is not None:
                     login(request, user)
+                    print(mail, psw)
                     messages.success(request, 'Login Successfull!!')
                     if user.is_admin:
                         return HttpResponseRedirect('/chairman/profile/')
@@ -99,6 +100,9 @@ def user_login(request):
                     office = OfficeStuff.objects.filter(email=mail)
                     for s in office:
                         return HttpResponseRedirect('/stuff/profile/')
+                    exam_controller = ExamController.objects.filter(email=mail)
+                    for s in exam_controller:
+                        return HttpResponseRedirect('/exam_controller/profile/')
                 else:
                     messages.error(request, 'wrong user enter correct one')
                     fm = LoginForm()
@@ -190,4 +194,24 @@ def office_stuff_signup(request):
         return render(request, 'authentication/officestuff_signup.html', {'form': form})
     return HttpResponseRedirect('/')
 
-    
+def exam_controller(request):
+    if not request.user.is_authenticated:
+        if request.method == 'POST':
+            form = ExamControllerRegForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save() 
+            else:
+                messages.info(request, 'Enter the correct value!!!')
+        form =  ExamControllerRegForm()
+        return render(request, 'authentication/external_teacher.html', {'form': form})
+    return HttpResponseRedirect('/')
+
+def exam_committe(request):
+    if request.method == 'POST':
+        form = ExamCommitteRegForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Registration Complete')
+            return HttpResponseRedirect('/auth/exam_committe/')
+    form = ExamCommitteRegForm()
+    return render(request, 'authentication/examcommitte.html', {'form': form})

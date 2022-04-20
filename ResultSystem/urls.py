@@ -11,6 +11,8 @@ urlpatterns = [
     path('faculty/', include('faculty.urls')),
     path('stuff/', include('stuff.urls')),
     path('chairman/', include('chairman.urls')),
+    path('exam_controller/', include('examcontroller.urls')),
+    path('examcommitte/', include('examcommite.urls')),
    
     path('', views.home_page, name="home"),
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

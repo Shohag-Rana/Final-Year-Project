@@ -1,11 +1,10 @@
-
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
 from authentication.models import *
 from chairman.models import Course, Teacher_Student_Info
-from . models import Attendence_and_CT_Mark
+from . models import Attendence_and_CT_Mark, Theory_Marks
 # Create your views here.
 def faculty_profile(request):
     if request.user.is_authenticated:
@@ -192,8 +191,8 @@ def ct_and_attendence_mark(request, course_code):
             ct_marks = request.POST.get(f'{student.student_id}')
             attend_marks = request.POST.get(f'{student.student_name}')
             if ct_marks and attend_marks:
-                ct_marks = (int(ct_marks))
-                attend_marks = (int(attend_marks))
+                ct_marks = (float(ct_marks))
+                attend_marks = (float(attend_marks))
                 if ct_marks > 20 or attend_marks > 10:
                     messages.warning(request, 'ct marks can not greater than 20 and attendence mark can not grater than 10')
                     return HttpResponseRedirect(f'/faculty/ct_and_attendence_mark/{course_code}/')       
@@ -349,11 +348,14 @@ def edit_ct_and_attendence_mark(request, course_code):
         return HttpResponseRedirect(f'/faculty/student_ct_and_attendence_mark/{course_code}/') 
     return render(request, 'faculty/edit_ct_and_attendence_mark.html', context)
 
-def detailed_mark_sheet(request, course_code):
+def Theory_mark_sheet(request, course_code):
     course = Course.objects.get(course_code= course_code)
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
-    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="special").order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+    checker = Theory_Marks.objects.filter(course_code= course_code)
+    for c in checker:
+        return HttpResponseRedirect(f'/faculty/update_theory_marks/{course_code}/')
     count = 0
     backLogStudents = {}
     for stu in regular_students:
@@ -363,33 +365,351 @@ def detailed_mark_sheet(request, course_code):
         backLogStudents[stu] = count
     if request.method == 'POST':
         for student in regular_students:
+            total_marks = 0
+            count = 0;
             q1 = request.POST.get(f'question1_{student.student_id}')
             if q1:
-                print(int(q1))
+                q1 = (float(q1))
+                count += 1
+            else:
+                q1 = 0
             q2 = request.POST.get(f'question2_{student.student_id}')
             if q2:
-                print(int(q2))
+                q2 = (float(q2))
+                count += 1
+            else:
+                q2 = 0
             q3 = request.POST.get(f'question3_{student.student_id}')
             if q3:
-                print(int(q3))
+                q3 = (float(q3))
+                count += 1
+            else:
+                q3 = 0
             q4 = request.POST.get(f'question4_{student.student_id}')
             if q4:
-                print(int(q4))
+                q4 = (float(q4))
+                count += 1
+            else:
+                q4 = 0
             q5 = request.POST.get(f'question5_{student.student_id}')
             if q5:
-                print(int(q5))
+                q5 = (float(q5))
+                count += 1
+            else:
+                q5 = 0
             q6 = request.POST.get(f'question6_{student.student_id}')
             if q6:
-                print(int(q6))
+                q6 = (float(q6))
+                count += 1
+            else:
+                q6 = 0
             q7 = request.POST.get(f'question7_{student.student_id}')
             if q7:
-                print(int(q7))
+                q7 = (float(q7))
+                count += 1
+            else:
+                q7 = 0
             q8 = request.POST.get(f'question8_{student.student_id}')
             if q8:
-                print(int(q8))
+                q8 = (float(q8))
+                count += 1
+            else:
+                q8 = 0
             q9 = request.POST.get(f'question9_{student.student_id}')
             if q9:
-                print(int(q9))
+                q9 = (float(q9))
+                count += 1
+            else:
+                q9 = 0
+            if count > 7:
+                messages.warning(request, 'A student can not answer more than seven question')
+                return HttpResponseRedirect(f'/faculty/detailed_mark_sheet/{course_code}/')
+            total_marks = q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9
+            remark = Teacher_Student_Info.objects.get(student_id = student.student_id, course_code= course_code)
+            data = Theory_Marks(
+                student_id = student.student_id,
+                student_name = student.student_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course.course_code,
+                course_name = course.course_name,
+                course_teacher = course.course_teacher,
+                credit = course.credit,
+                remarks = remark.remarks,
+                q1 = q1,
+                q2 = q2,
+                q3 = q3,
+                q4 = q4,
+                q5 = q5,
+                q6 = q6,
+                q7 = q7,
+                q8 = q8,
+                q9 = q9,
+                total_marks = total_marks,
+            )
+            checker = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course.course_code)
+            flag = False
+            for c in checker:
+                id = c.id
+                flag = True
+            if flag == True:
+                update_data = Theory_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.student_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    course_name = course.course_name,
+                    course_teacher = course.course_teacher,
+                    credit = course.credit,
+                    remarks = remark.remarks,
+                    q1 = q1,
+                    q2 = q2,
+                    q3 = q3,
+                    q4 = q4,
+                    q5 = q5,
+                    q6 = q6,
+                    q7 = q7,
+                    q8 = q8,
+                    q9 = q9,
+                    total_marks = total_marks,
+                )
+                update_data.save()
+            else:
+                data.save()
+        for student in backLog_students:
+            total_marks = 0
+            count = 0;
+            q1 = request.POST.get(f'question1_{student.student_id}')
+            if q1:
+                q1 = (float(q1))
+                count += 1
+            else:
+                q1 = 0
+            q2 = request.POST.get(f'question2_{student.student_id}')
+            if q2:
+                q2 = (float(q2))
+                count += 1
+            else:
+                q2 = 0
+            q3 = request.POST.get(f'question3_{student.student_id}')
+            if q3:
+                q3 = (float(q3))
+                count += 1
+            else:
+                q3 = 0
+            q4 = request.POST.get(f'question4_{student.student_id}')
+            if q4:
+                q4 = (float(q4))
+                count += 1
+            else:
+                q4 = 0
+            q5 = request.POST.get(f'question5_{student.student_id}')
+            if q5:
+                q5 = (float(q5))
+                count += 1
+            else:
+                q5 = 0
+            q6 = request.POST.get(f'question6_{student.student_id}')
+            if q6:
+                q6 = (float(q6))
+                count += 1
+            else:
+                q6 = 0
+            q7 = request.POST.get(f'question7_{student.student_id}')
+            if q7:
+                q7 = (float(q7))
+                count += 1
+            else:
+                q7 = 0
+            q8 = request.POST.get(f'question8_{student.student_id}')
+            if q8:
+                q8 = (float(q8))
+                count += 1
+            else:
+                q8 = 0
+            q9 = request.POST.get(f'question9_{student.student_id}')
+            if q9:
+                q9 = (float(q9))
+                count += 1
+            else:
+                q9 = 0
+            if count > 7:
+                messages.warning(request, 'A student can not answer more than seven question')
+                return HttpResponseRedirect(f'/faculty/detailed_mark_sheet/{course_code}/')
+            total_marks = q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9
+            remark = Teacher_Student_Info.objects.get(student_id = student.student_id, course_code= course_code)
+            data = Theory_Marks(
+                student_id = student.student_id,
+                student_name = student.student_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course.course_code,
+                course_name = course.course_name,
+                course_teacher = course.course_teacher,
+                credit = course.credit,
+                remarks = remark.remarks,
+                q1 = q1,
+                q2 = q2,
+                q3 = q3,
+                q4 = q4,
+                q5 = q5,
+                q6 = q6,
+                q7 = q7,
+                q8 = q8,
+                q9 = q9,
+                total_marks = total_marks,
+            )
+            checker = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course.course_code)
+            flag = False
+            for c in checker:
+                id = c.id
+                flag = True
+            if flag == True:
+                update_data = Theory_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.student_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    course_name = course.course_name,
+                    course_teacher = course.course_teacher,
+                    credit = course.credit,
+                    remarks = remark.remarks,
+                    q1 = q1,
+                    q2 = q2,
+                    q3 = q3,
+                    q4 = q4,
+                    q5 = q5,
+                    q6 = q6,
+                    q7 = q7,
+                    q8 = q8,
+                    q9 = q9,
+                    total_marks = total_marks,
+                )
+                update_data.save()
+            else:
+                data.save()
+        for student in special_students:
+            total_marks = 0
+            count = 0;
+            q1 = request.POST.get(f'question1_{student.student_id}')
+            if q1:
+                q1 = (float(q1))
+                count += 1
+            else:
+                q1 = 0
+            q2 = request.POST.get(f'question2_{student.student_id}')
+            if q2:
+                q2 = (float(q2))
+                count += 1
+            else:
+                q2 = 0
+            q3 = request.POST.get(f'question3_{student.student_id}')
+            if q3:
+                q3 = (float(q3))
+                count += 1
+            else:
+                q3 = 0
+            q4 = request.POST.get(f'question4_{student.student_id}')
+            if q4:
+                q4 = (float(q4))
+                count += 1
+            else:
+                q4 = 0
+            q5 = request.POST.get(f'question5_{student.student_id}')
+            if q5:
+                q5 = (float(q5))
+                count += 1
+            else:
+                q5 = 0
+            q6 = request.POST.get(f'question6_{student.student_id}')
+            if q6:
+                q6 = (float(q6))
+                count += 1
+            else:
+                q6 = 0
+            q7 = request.POST.get(f'question7_{student.student_id}')
+            if q7:
+                q7 = (float(q7))
+                count += 1
+            else:
+                q7 = 0
+            q8 = request.POST.get(f'question8_{student.student_id}')
+            if q8:
+                q8 = (float(q8))
+                count += 1
+            else:
+                q8 = 0
+            q9 = request.POST.get(f'question9_{student.student_id}')
+            if q9:
+                q9 = (float(q9))
+                count += 1
+            else:
+                q9 = 0
+            if count > 7:
+                messages.warning(request, 'A student can not answer more than seven question')
+                return HttpResponseRedirect(f'/faculty/detailed_mark_sheet/{course_code}/')
+            total_marks = q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9
+            remark = Teacher_Student_Info.objects.get(student_id = student.student_id, course_code= course_code)
+            data = Theory_Marks(
+                student_id = student.student_id,
+                student_name = student.student_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course.course_code,
+                course_name = course.course_name,
+                course_teacher = course.course_teacher,
+                credit = course.credit,
+                remarks = remark.remarks,
+                q1 = q1,
+                q2 = q2,
+                q3 = q3,
+                q4 = q4,
+                q5 = q5,
+                q6 = q6,
+                q7 = q7,
+                q8 = q8,
+                q9 = q9,
+                total_marks = total_marks,
+            )
+            checker = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course.course_code)
+            flag = False
+            for c in checker:
+                id = c.id
+                flag = True
+            if flag == True:
+                update_data = Theory_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.student_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    course_name = course.course_name,
+                    course_teacher = course.course_teacher,
+                    credit = course.credit,
+                    remarks = remark.remarks,
+                    q1 = q1,
+                    q2 = q2,
+                    q3 = q3,
+                    q4 = q4,
+                    q5 = q5,
+                    q6 = q6,
+                    q7 = q7,
+                    q8 = q8,
+                    q9 = q9,
+                    total_marks = total_marks,
+                )
+                update_data.save()
+            else:
+                data.save()
+        
+        messages.success(request, 'Theory Marks added/updated successfully')
+        return HttpResponseRedirect(f'/faculty/show_theory_marks/{course_code}/')
+            
     context = {
         'semister_no': course.semister_no,
         'c_code': course_code,
@@ -400,3 +720,570 @@ def detailed_mark_sheet(request, course_code):
         'special_students': special_students,
         }
     return render(request, 'faculty/detailed_mark_sheet.html', context)
+
+def show_theory_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students_marks = Theory_Marks.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+    backLog_students_marks = Theory_Marks.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+    special_students_marks = Theory_Marks.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students_marks:
+        count += 1
+    for stu in backLog_students_marks:
+        count += 1
+        backLogStudents[stu] = count
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_students_marks': regular_students_marks,
+        'backLogStudents': backLogStudents,
+        'special_students_marks': special_students_marks,
+        }
+    return render(request, 'faculty/show_theory_marks.html', context)
+
+def update_theory_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students_theory_marks = Theory_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students_theory_marks = Theory_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students_theory_marks = Theory_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students_theory_marks:
+        count += 1
+    for stu in backLog_students_theory_marks:
+        count += 1
+        backLogStudents[stu] = count
+    
+    if request.method == 'POST':
+        regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+        backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+        special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+        for student in regular_students:
+            total_marks = 0
+            count = 0;
+            q1 = request.POST.get(f'question1_{student.student_id}')
+            if q1:
+                q1 = (float(q1))
+                count += 1
+            else:
+                q1 = 0
+            q2 = request.POST.get(f'question2_{student.student_id}')
+            if q2:
+                q2 = (float(q2))
+                count += 1
+            else:
+                q2 = 0
+            q3 = request.POST.get(f'question3_{student.student_id}')
+            if q3:
+                q3 = (float(q3))
+                count += 1
+            else:
+                q3 = 0
+            q4 = request.POST.get(f'question4_{student.student_id}')
+            if q4:
+                q4 = (float(q4))
+                count += 1
+            else:
+                q4 = 0
+            q5 = request.POST.get(f'question5_{student.student_id}')
+            if q5:
+                q5 = (float(q5))
+                count += 1
+            else:
+                q5 = 0
+            q6 = request.POST.get(f'question6_{student.student_id}')
+            if q6:
+                q6 = (float(q6))
+                count += 1
+            else:
+                q6 = 0
+            q7 = request.POST.get(f'question7_{student.student_id}')
+            if q7:
+                q7 = (float(q7))
+                count += 1
+            else:
+                q7 = 0
+            q8 = request.POST.get(f'question8_{student.student_id}')
+            if q8:
+                q8 = (float(q8))
+                count += 1
+            else:
+                q8 = 0
+            q9 = request.POST.get(f'question9_{student.student_id}')
+            if q9:
+                q9 = (float(q9))
+                count += 1
+            else:
+                q9 = 0
+            if count > 7:
+                messages.warning(request, 'A student can not answer more than seven question')
+                return HttpResponseRedirect(f'/faculty/Theory_mark_sheet/{course_code}/')
+            total_marks = q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9
+            remark = Teacher_Student_Info.objects.get(student_id = student.student_id, course_code= course_code)
+            data = Theory_Marks(
+                student_id = student.student_id,
+                student_name = student.student_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course.course_code,
+                course_name = course.course_name,
+                course_teacher = course.course_teacher,
+                credit = course.credit,
+                remarks = remark.remarks,
+                q1 = q1,
+                q2 = q2,
+                q3 = q3,
+                q4 = q4,
+                q5 = q5,
+                q6 = q6,
+                q7 = q7,
+                q8 = q8,
+                q9 = q9,
+                total_marks = total_marks,
+            )
+            checker = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course.course_code)
+            flag = False
+            for c in checker:
+                id = c.id
+                flag = True
+            if flag == True:
+                update_data = Theory_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.student_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    course_name = course.course_name,
+                    course_teacher = course.course_teacher,
+                    credit = course.credit,
+                    remarks = remark.remarks,
+                    q1 = q1,
+                    q2 = q2,
+                    q3 = q3,
+                    q4 = q4,
+                    q5 = q5,
+                    q6 = q6,
+                    q7 = q7,
+                    q8 = q8,
+                    q9 = q9,
+                    total_marks = total_marks,
+                )
+                update_data.save()
+            else:
+                data.save()
+        for student in backLog_students:
+            total_marks = 0
+            count = 0;
+            q1 = request.POST.get(f'question1_{student.student_id}')
+            if q1:
+                q1 = (float(q1))
+                count += 1
+            else:
+                q1 = 0
+            q2 = request.POST.get(f'question2_{student.student_id}')
+            if q2:
+                q2 = (float(q2))
+                count += 1
+            else:
+                q2 = 0
+            q3 = request.POST.get(f'question3_{student.student_id}')
+            if q3:
+                q3 = (float(q3))
+                count += 1
+            else:
+                q3 = 0
+            q4 = request.POST.get(f'question4_{student.student_id}')
+            if q4:
+                q4 = (float(q4))
+                count += 1
+            else:
+                q4 = 0
+            q5 = request.POST.get(f'question5_{student.student_id}')
+            if q5:
+                q5 = (float(q5))
+                count += 1
+            else:
+                q5 = 0
+            q6 = request.POST.get(f'question6_{student.student_id}')
+            if q6:
+                q6 = (float(q6))
+                count += 1
+            else:
+                q6 = 0
+            q7 = request.POST.get(f'question7_{student.student_id}')
+            if q7:
+                q7 = (float(q7))
+                count += 1
+            else:
+                q7 = 0
+            q8 = request.POST.get(f'question8_{student.student_id}')
+            if q8:
+                q8 = (float(q8))
+                count += 1
+            else:
+                q8 = 0
+            q9 = request.POST.get(f'question9_{student.student_id}')
+            if q9:
+                q9 = (float(q9))
+                count += 1
+            else:
+                q9 = 0
+            if count > 7:
+                messages.warning(request, 'A student can not answer more than seven question')
+                return HttpResponseRedirect(f'/faculty/Theory_mark_sheet/{course_code}/')
+            total_marks = q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9
+            remark = Teacher_Student_Info.objects.get(student_id = student.student_id, course_code= course_code)
+            data = Theory_Marks(
+                student_id = student.student_id,
+                student_name = student.student_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course.course_code,
+                course_name = course.course_name,
+                course_teacher = course.course_teacher,
+                credit = course.credit,
+                remarks = remark.remarks,
+                q1 = q1,
+                q2 = q2,
+                q3 = q3,
+                q4 = q4,
+                q5 = q5,
+                q6 = q6,
+                q7 = q7,
+                q8 = q8,
+                q9 = q9,
+                total_marks = total_marks,
+            )
+            checker = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course.course_code)
+            flag = False
+            for c in checker:
+                id = c.id
+                flag = True
+            if flag == True:
+                update_data = Theory_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.student_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    course_name = course.course_name,
+                    course_teacher = course.course_teacher,
+                    credit = course.credit,
+                    remarks = remark.remarks,
+                    q1 = q1,
+                    q2 = q2,
+                    q3 = q3,
+                    q4 = q4,
+                    q5 = q5,
+                    q6 = q6,
+                    q7 = q7,
+                    q8 = q8,
+                    q9 = q9,
+                    total_marks = total_marks,
+                )
+                update_data.save()
+            else:
+                data.save()
+        for student in special_students:
+            total_marks = 0
+            count = 0;
+            q1 = request.POST.get(f'question1_{student.student_id}')
+            if q1:
+                q1 = (float(q1))
+                count += 1
+            else:
+                q1 = 0
+            q2 = request.POST.get(f'question2_{student.student_id}')
+            if q2:
+                q2 = (float(q2))
+                count += 1
+            else:
+                q2 = 0
+            q3 = request.POST.get(f'question3_{student.student_id}')
+            if q3:
+                q3 = (float(q3))
+                count += 1
+            else:
+                q3 = 0
+            q4 = request.POST.get(f'question4_{student.student_id}')
+            if q4:
+                q4 = (float(q4))
+                count += 1
+            else:
+                q4 = 0
+            q5 = request.POST.get(f'question5_{student.student_id}')
+            if q5:
+                q5 = (float(q5))
+                count += 1
+            else:
+                q5 = 0
+            q6 = request.POST.get(f'question6_{student.student_id}')
+            if q6:
+                q6 = (float(q6))
+                count += 1
+            else:
+                q6 = 0
+            q7 = request.POST.get(f'question7_{student.student_id}')
+            if q7:
+                q7 = (float(q7))
+                count += 1
+            else:
+                q7 = 0
+            q8 = request.POST.get(f'question8_{student.student_id}')
+            if q8:
+                q8 = (float(q8))
+                count += 1
+            else:
+                q8 = 0
+            q9 = request.POST.get(f'question9_{student.student_id}')
+            if q9:
+                q9 = (float(q9))
+                count += 1
+            else:
+                q9 = 0
+            if count > 7:
+                messages.warning(request, 'A student can not answer more than seven question')
+                return HttpResponseRedirect(f'/faculty/Theory_mark_sheet/{course_code}/')
+            total_marks = q1 + q2 + q3 + q4 + q5 + q6 + q7 + q8 + q9
+            remark = Teacher_Student_Info.objects.get(student_id = student.student_id, course_code= course_code)
+            data = Theory_Marks(
+                student_id = student.student_id,
+                student_name = student.student_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course.course_code,
+                course_name = course.course_name,
+                course_teacher = course.course_teacher,
+                credit = course.credit,
+                remarks = remark.remarks,
+                q1 = q1,
+                q2 = q2,
+                q3 = q3,
+                q4 = q4,
+                q5 = q5,
+                q6 = q6,
+                q7 = q7,
+                q8 = q8,
+                q9 = q9,
+                total_marks = total_marks,
+            )
+            checker = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course.course_code)
+            flag = False
+            for c in checker:
+                id = c.id
+                flag = True
+            if flag == True:
+                update_data = Theory_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.student_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    course_name = course.course_name,
+                    course_teacher = course.course_teacher,
+                    credit = course.credit,
+                    remarks = remark.remarks,
+                    q1 = q1,
+                    q2 = q2,
+                    q3 = q3,
+                    q4 = q4,
+                    q5 = q5,
+                    q6 = q6,
+                    q7 = q7,
+                    q8 = q8,
+                    q9 = q9,
+                    total_marks = total_marks,
+                )
+                update_data.save()
+            else:
+                data.save()
+        
+        messages.success(request, 'Theory Marks added/updated successfully')
+        return HttpResponseRedirect(f'/faculty/show_theory_marks/{course_code}/')
+    context = {
+        'course_code': course_code,
+        'course_name': course.course_name,
+        'credit': course.credit,
+        'semester_no': course.semister_no,
+        'course_teacher': course.course_teacher,
+        'regular_students_theory_marks': regular_students_theory_marks,
+        'backLogStudents': backLogStudents,
+        'special_students_theory_marks': special_students_theory_marks,
+    }
+    return render(request, 'faculty/update_theory_marks.html', context)
+
+def consolidated_marks_sheet(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks= 'Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks= 'BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks= 'Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    consolidated_marks_regular = {}
+    consolidated_marks_backLog = {}
+    consolidated_marks_special = {}
+    for student in regular_students:
+        ct_and_attendence_marks = Attendence_and_CT_Mark.objects.filter(student_id = student.student_id, course_code = course_code)
+        theory_marks = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course_code)
+        for mark in ct_and_attendence_marks:
+            ct_marks = mark.ct_marks
+            attendence_mark = mark.attendence_marks
+        for mark in theory_marks:
+            theory_mark = mark.total_marks
+        total_marks = ct_marks + attendence_mark + theory_mark
+        if total_marks >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks > 74 and total_marks < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks > 69 and total_marks < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks > 64 and total_marks < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks > 59 and total_marks < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks > 54 and total_marks < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks > 49 and total_marks < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks > 44 and total_marks < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks > 39 and total_marks < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        consolidated_marks_regular[student] = {'ct_mark': ct_marks, 'attendence_mark': attendence_mark,
+        'theory_mark':theory_mark, 'full_marks': total_marks, 'LG': LG, 'GP': GP}
+    
+    for student in backLog_students:
+        ct_and_attendence_marks = Attendence_and_CT_Mark.objects.filter(student_id = student.student_id, course_code = course_code)
+        theory_marks = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course_code)
+        ct_marks = 0
+        attendence_mark = 0
+        theory_mark =0 
+        for mark in ct_and_attendence_marks:
+            ct_marks = mark.ct_marks
+            attendence_mark = mark.attendence_marks
+        for mark in theory_marks:
+            theory_mark = mark.total_marks
+        total_marks = ct_marks + attendence_mark + theory_mark
+        if total_marks >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks > 74 and total_marks < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks > 69 and total_marks < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks > 64 and total_marks < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks > 59 and total_marks < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks > 54 and total_marks < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks > 49 and total_marks < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks > 44 and total_marks < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks > 39 and total_marks < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        count += 1
+        consolidated_marks_backLog[student] = {'ct_mark': ct_marks, 'attendence_mark': attendence_mark,
+        'theory_mark':theory_mark, 'full_marks': total_marks, 'LG': LG, 'GP': GP, 'count': count}
+    
+    for student in special_students:
+        ct_and_attendence_marks = Attendence_and_CT_Mark.objects.filter(student_id = student.student_id, course_code = course_code)
+        theory_marks = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course_code)
+        for mark in ct_and_attendence_marks:
+            ct_marks = mark.ct_marks
+            attendence_mark = mark.attendence_marks
+        for mark in theory_marks:
+            theory_mark = mark.total_marks
+        total_marks = ct_marks + attendence_mark + theory_mark
+        if total_marks >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks > 74 and total_marks < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks > 69 and total_marks < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks > 64 and total_marks < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks > 59 and total_marks < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks > 54 and total_marks < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks > 49 and total_marks < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks > 44 and total_marks < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks > 39 and total_marks < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        consolidated_marks_special[student] = {'ct_mark': ct_marks, 'attendence_mark': attendence_mark,
+        'theory_mark':theory_mark, 'full_marks': total_marks, 'LG': LG, 'GP': GP}
+    
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'consolidated_marks_regular': consolidated_marks_regular,
+        'consolidated_marks_backLog': consolidated_marks_backLog,
+        'consolidated_marks_special': consolidated_marks_special,
+    }
+    return render(request, 'faculty/consolidated_marks_sheet.html', context)
+
+def send_to_controller_theory_marks(request,course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Theory_Marks.objects.filter(course_code = course_code, remarks= 'Regular').order_by('student_id')
+    backLog_students = Theory_Marks.objects.filter(course_code = course_code, remarks= 'BackLog').order_by('student_id')
+    special_students = Theory_Marks.objects.filter(course_code = course_code, remarks= 'Special').order_by('student_id')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_name': course.course_name,
+        'credit': course.credit,
+        'regular_students': regular_students,
+        'backLog_students': backLog_students,
+        'special_students': special_students,
+    }
+    return render(request, 'faculty/send_to_controller.html', context)

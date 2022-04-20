@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'faculty',
     'stuff',
     'chairman',
+    'examcontroller',
+    'examcommite',
 ]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
