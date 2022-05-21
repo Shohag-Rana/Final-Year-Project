@@ -2,9 +2,10 @@ from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model, update_session_auth_hash
+from requests import request
 from authentication.models import *
 from chairman.models import Course, Teacher_Student_Info
-from . models import Attendence_and_CT_Mark, Theory_Marks
+from . models import Final_MarkSheet_Viva_Course, Viva_Marks, Final_MarkSheet_Project_Course, Final_MarkSheet_Lab_Course, Attendence_and_CT_Mark, Lab_Final_50_Marks, Theory_Marks, Lab_Marks, Project_Marks, Research_Project_Marks
 # Create your views here.
 def faculty_profile(request):
     if request.user.is_authenticated:
@@ -101,6 +102,14 @@ def course_details(request, course_code):
     backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Special').order_by('student_id')
     course = Course.objects.get(course_code= course_code)
+    if course.course_type == 'Lab':
+        return HttpResponseRedirect(f'/faculty/lab_course_details/{course.course_code}/')
+    if course.course_type == 'Project':
+        return HttpResponseRedirect(f'/faculty/project_course_details/{course.course_code}/')
+    if course.course_type == 'Research_Project':
+        return HttpResponseRedirect(f'/faculty/research_project_course_details/{course.course_code}/')
+    if course.course_type == 'Viva':
+        return HttpResponseRedirect(f'/faculty/viva_project_course_details/{course.course_code}/')
     c_code = (course.course_code)
     c_name = (course.course_name)
     c_credit = (course.credit)
@@ -122,6 +131,29 @@ def course_details(request, course_code):
         'special_students': special_students,
     }
     return render(request, 'faculty/course_details.html', context)
+
+def lab_course_details(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
+    context = {
+    'c_code' : (course.course_code),
+    'c_name' : (course.course_name),
+    'c_credit' : (course.credit),
+    'c_teacher' : course.course_teacher,
+    'regular_students': regular_students,
+    'backLogStudents': backLogStudents,
+    'special_students': special_students,
+    }
+    return render(request, 'faculty/lab_course_details.html', context)
 
 def attendence_sheet(request, course_code):
     course = Course.objects.get(course_code= course_code)
@@ -151,28 +183,60 @@ def attendence_sheet(request, course_code):
 def ct_and_attendence_mark(request, course_code):
     course = Course.objects.get(course_code= course_code)
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks= 'Regular').order_by('student_id')
-    ct_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
     count = 0
     backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
     for stu in regular_students:
+        student_details = {}
+        ct_attend_marks = Attendence_and_CT_Mark.objects.filter(student_id= stu.student_id, course_code= course_code)
+        ct_marks = 0
+        attendence_mark = 0
+        for c in ct_attend_marks:
+            ct_marks = c.ct_marks 
+            attendence_mark = c.attendence_marks
+        student_details['ct_marks'] = ct_marks
+        student_details['attendence_mark'] = attendence_mark
+        regularStudents[stu] = student_details
         count += 1
     for stu in backLog_students:
+        student_details = {}
+        ct_attend_marks = Attendence_and_CT_Mark.objects.filter(student_id= stu.student_id, course_code= course_code)
+        ct_marks = 0
+        attendence_mark = 0
+        for c in ct_attend_marks:
+            ct_marks = c.ct_marks 
+            attendence_mark = c.attendence_marks
         count += 1
-        backLogStudents[stu] = count
-    for check in ct_attend_marks:
-        return HttpResponseRedirect(f'/faculty/edit_ct_and_attendence_mark/{course_code}/') 
+        student_details['ct_marks'] = ct_marks
+        student_details['attendence_mark'] = attendence_mark
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
+    for stu in special_students:
+        student_details = {}
+        ct_attend_marks = Attendence_and_CT_Mark.objects.filter(student_id= stu.student_id, course_code= course_code)
+        ct_marks = 0
+        attendence_mark = 0
+        for c in ct_attend_marks:
+            ct_marks = c.ct_marks 
+            attendence_mark = c.attendence_marks
+        count += 1
+        student_details['ct_marks'] = ct_marks
+        student_details['attendence_mark'] = attendence_mark
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     context = {
         'semister_no': course.semister_no,
         'c_code': course_code,
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'regular_students': regular_students,
+        'regularStudents': regularStudents,
         'ct_attend_marks': ct_attend_marks,
         'backLogStudents': backLogStudents,
-        'special_students': special_students,
+        'specialStudents': specialStudents,
         }
     if request.method == 'POST':
         course = Course.objects.get(course_code= course_code)
@@ -1133,6 +1197,9 @@ def consolidated_marks_sheet(request, course_code):
     for student in regular_students:
         ct_and_attendence_marks = Attendence_and_CT_Mark.objects.filter(student_id = student.student_id, course_code = course_code)
         theory_marks = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course_code)
+        ct_marks = 0
+        attendence_mark = 0
+        theory_mark = 0
         for mark in ct_and_attendence_marks:
             ct_marks = mark.ct_marks
             attendence_mark = mark.attendence_marks
@@ -1221,6 +1288,9 @@ def consolidated_marks_sheet(request, course_code):
     for student in special_students:
         ct_and_attendence_marks = Attendence_and_CT_Mark.objects.filter(student_id = student.student_id, course_code = course_code)
         theory_marks = Theory_Marks.objects.filter(student_id = student.student_id, course_code = course_code)
+        ct_marks = 0
+        attendence_mark = 0
+        theory_mark = 0
         for mark in ct_and_attendence_marks:
             ct_marks = mark.ct_marks
             attendence_mark = mark.attendence_marks
@@ -1287,3 +1357,3208 @@ def send_to_controller_theory_marks(request,course_code):
         'special_students': special_students,
     }
     return render(request, 'faculty/send_to_controller.html', context)
+
+def lab_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    checker = Lab_Marks.objects.filter(course_code= course_code)
+    for c in checker:
+        return HttpResponseRedirect(f'/faculty/edit_lab_marks/{course_code}/')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+
+            lab_attendence = request.POST.get(f'lab_attendence_{stu.student_id}')
+            
+            if lab_attendence:
+                lab_attendence_mark = (float(lab_attendence))
+            else:
+                lab_attendence_mark = 0
+            
+            lab_report = request.POST.get(f'lab_report_{stu.student_id}')
+            if lab_report:
+                lab_report_mark = (float(lab_report))
+            else:
+                lab_report_mark = 0
+
+            lab_quize = request.POST.get(f'lab_quize_{stu.student_id}')
+            if lab_quize:
+                lab_quize_mark = (float(lab_quize))
+            else:
+                lab_quize_mark = 0
+            lab_total_mark = lab_attendence_mark + lab_report_mark + lab_quize_mark
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                lab_attendence = lab_attendence_mark,
+                lab_report = lab_report_mark,
+                lab_quize = lab_quize_mark,
+                lab_total_mark = lab_total_mark,
+            )
+            checker = Lab_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    lab_attendence = lab_attendence_mark,
+                    lab_report = lab_report_mark,
+                    lab_quize = lab_quize_mark,
+                    lab_total_mark = lab_total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+
+            lab_attendence = request.POST.get(f'lab_attendence_{stu.student_id}')
+            
+            if lab_attendence:
+                lab_attendence_mark = (float(lab_attendence))
+            else:
+                lab_attendence_mark = 0
+            
+            lab_report = request.POST.get(f'lab_report_{stu.student_id}')
+            if lab_report:
+                lab_report_mark = (float(lab_report))
+            else:
+                lab_report_mark = 0
+
+            lab_quize = request.POST.get(f'lab_quize_{stu.student_id}')
+            if lab_quize:
+                lab_quize_mark = (float(lab_quize))
+            else:
+                lab_quize_mark = 0
+            lab_total_mark = lab_attendence_mark + lab_report_mark + lab_quize_mark
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                lab_attendence = lab_attendence_mark,
+                lab_report = lab_report_mark,
+                lab_quize = lab_quize_mark,
+                lab_total_mark = lab_total_mark,
+            )
+            checker = Lab_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    lab_attendence = lab_attendence_mark,
+                    lab_report = lab_report_mark,
+                    lab_quize = lab_quize_mark,
+                    lab_total_mark = lab_total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+
+            lab_attendence = request.POST.get(f'lab_attendence_{stu.student_id}')
+            
+            if lab_attendence:
+                lab_attendence_mark = (float(lab_attendence))
+            else:
+                lab_attendence_mark = 0
+            
+            lab_report = request.POST.get(f'lab_report_{stu.student_id}')
+            if lab_report:
+                lab_report_mark = (float(lab_report))
+            else:
+                lab_report_mark = 0
+
+            lab_quize = request.POST.get(f'lab_quize_{stu.student_id}')
+            if lab_quize:
+                lab_quize_mark = (float(lab_quize))
+            else:
+                lab_quize_mark = 0
+            lab_total_mark = lab_attendence_mark + lab_report_mark + lab_quize_mark
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                lab_attendence = lab_attendence_mark,
+                lab_report = lab_report_mark,
+                lab_quize = lab_quize_mark,
+                lab_total_mark = lab_total_mark,
+            )
+            checker = Lab_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    lab_attendence = lab_attendence_mark,
+                    lab_report = lab_report_mark,
+                    lab_quize = lab_quize_mark,
+                    lab_total_mark = lab_total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+
+        return HttpResponseRedirect(f'/faculty/show_lab_marks/{course_code}/')
+
+
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/lab_marks.html', context)
+
+def final_50_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    checker = Lab_Final_50_Marks.objects.filter(course_code= course_code)
+    for c in checker:
+        return HttpResponseRedirect(f'/faculty/edit_lab_final_50_marks/{course_code}/')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            final_practical_exam = request.POST.get(f'final_practical_exam_{stu.student_id}')
+            if final_practical_exam:
+                final_practical_exam = float(final_practical_exam)
+            else:
+                final_practical_exam = 0
+            
+            viva_voce = request.POST.get(f'viva_voce_{stu.student_id}')
+            if viva_voce:
+                viva_voce = float(viva_voce)
+            else:
+                viva_voce = 0
+            total_mark = final_practical_exam + viva_voce
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Final_50_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                final_practical_exam = final_practical_exam,
+                viva_voce = viva_voce,
+                total_mark = total_mark,
+            )
+            checker = Lab_Final_50_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Final_50_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    final_practical_exam = final_practical_exam,
+                    viva_voce = viva_voce,
+                    total_mark = total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            final_practical_exam = request.POST.get(f'final_practical_exam_{stu.student_id}')
+            if final_practical_exam:
+                final_practical_exam = float(final_practical_exam)
+            else:
+                final_practical_exam = 0
+            
+            viva_voce = request.POST.get(f'viva_voce_{stu.student_id}')
+            if viva_voce:
+                viva_voce = float(viva_voce)
+            else:
+                viva_voce = 0
+            total_mark = final_practical_exam + viva_voce
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Final_50_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                final_practical_exam = final_practical_exam,
+                viva_voce = viva_voce,
+                total_mark = total_mark,
+            )
+            checker = Lab_Final_50_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Final_50_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    final_practical_exam = final_practical_exam,
+                    viva_voce = viva_voce,
+                    total_mark = total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            final_practical_exam = request.POST.get(f'final_practical_exam_{stu.student_id}')
+            if final_practical_exam:
+                final_practical_exam = float(final_practical_exam)
+            else:
+                final_practical_exam = 0
+            
+            viva_voce = request.POST.get(f'viva_voce_{stu.student_id}')
+            if viva_voce:
+                viva_voce = float(viva_voce)
+            else:
+                viva_voce = 0
+            total_mark = final_practical_exam + viva_voce
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Final_50_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                final_practical_exam = final_practical_exam,
+                viva_voce = viva_voce,
+                total_mark = total_mark,
+            )
+            checker = Lab_Final_50_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Final_50_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    final_practical_exam = final_practical_exam,
+                    viva_voce = viva_voce,
+                    total_mark = total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_final_50_marks/{course_code}/')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/final_50_marks.html', context)
+
+def consoilated_lab_marksheet(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        final_practical_exam_checker = Lab_Final_50_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        final_practical_exam_mark = 0
+        for c in final_practical_exam_checker:
+            final_practical_exam_mark = c.total_mark
+        labreport_attendence_quize_checker = Lab_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        labreport_attendence_quize_mark = 0
+        for c in labreport_attendence_quize_checker:
+            labreport_attendence_quize_mark = c.lab_total_mark
+        total_marks_100 = final_practical_exam_mark + labreport_attendence_quize_mark
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'final_practical_exam_mark': final_practical_exam_mark, 'labreport_attendence_quize_mark': labreport_attendence_quize_mark,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        submit_button = True
+        data = Final_MarkSheet_Lab_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            final_practical_exam_mark = final_practical_exam_mark,
+            labreport_attendence_quize_mark = labreport_attendence_quize_mark,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Lab_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Lab_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    final_practical_exam_mark = final_practical_exam_mark,
+                    labreport_attendence_quize_mark = labreport_attendence_quize_mark,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        final_practical_exam_checker = Lab_Final_50_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        final_practical_exam_mark = 0
+        for c in final_practical_exam_checker:
+            final_practical_exam_mark = c.total_mark
+        labreport_attendence_quize_checker = Lab_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        labreport_attendence_quize_mark = 0
+        for c in labreport_attendence_quize_checker:
+            labreport_attendence_quize_mark = c.lab_total_mark
+        total_marks_100 = final_practical_exam_mark + labreport_attendence_quize_mark
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'final_practical_exam_mark': final_practical_exam_mark, 'labreport_attendence_quize_mark': labreport_attendence_quize_mark,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        submit_button = True
+        data = Final_MarkSheet_Lab_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            final_practical_exam_mark = final_practical_exam_mark,
+            labreport_attendence_quize_mark = labreport_attendence_quize_mark,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Lab_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Lab_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    final_practical_exam_mark = final_practical_exam_mark,
+                    labreport_attendence_quize_mark = labreport_attendence_quize_mark,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        final_practical_exam_checker = Lab_Final_50_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        final_practical_exam_mark = 0
+        for c in final_practical_exam_checker:
+            final_practical_exam_mark = c.total_mark
+        labreport_attendence_quize_checker = Lab_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        labreport_attendence_quize_mark = 0
+        for c in labreport_attendence_quize_checker:
+            labreport_attendence_quize_mark = c.lab_total_mark
+        total_marks_100 = final_practical_exam_mark + labreport_attendence_quize_mark
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'final_practical_exam_mark': final_practical_exam_mark, 'labreport_attendence_quize_mark': labreport_attendence_quize_mark,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        submit_button = True
+        data = Final_MarkSheet_Lab_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            final_practical_exam_mark = final_practical_exam_mark,
+            labreport_attendence_quize_mark = labreport_attendence_quize_mark,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Lab_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Lab_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    final_practical_exam_mark = final_practical_exam_mark,
+                    labreport_attendence_quize_mark = labreport_attendence_quize_mark,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/consoilated_lab_marksheet.html', context)
+
+def show_lab_marks(requset, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Lab_Marks.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+    backLog_students = Lab_Marks.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+    special_students = Lab_Marks.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(requset, 'faculty/show_lab_marks.html', context)
+
+def edit_lab_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Lab_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Lab_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Lab_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+
+            lab_attendence = request.POST.get(f'lab_attendence_{stu.student_id}')
+            
+            if lab_attendence:
+                lab_attendence_mark = (float(lab_attendence))
+            else:
+                lab_attendence_mark = 0
+            
+            lab_report = request.POST.get(f'lab_report_{stu.student_id}')
+            if lab_report:
+                lab_report_mark = (float(lab_report))
+            else:
+                lab_report_mark = 0
+
+            lab_quize = request.POST.get(f'lab_quize_{stu.student_id}')
+            if lab_quize:
+                lab_quize_mark = (float(lab_quize))
+            else:
+                lab_quize_mark = 0
+            lab_total_mark = lab_attendence_mark + lab_report_mark + lab_quize_mark
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                lab_attendence = lab_attendence_mark,
+                lab_report = lab_report_mark,
+                lab_quize = lab_quize_mark,
+                lab_total_mark = lab_total_mark,
+            )
+            checker = Lab_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    lab_attendence = lab_attendence_mark,
+                    lab_report = lab_report_mark,
+                    lab_quize = lab_quize_mark,
+                    lab_total_mark = lab_total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+
+            lab_attendence = request.POST.get(f'lab_attendence_{stu.student_id}')
+            
+            if lab_attendence:
+                lab_attendence_mark = (float(lab_attendence))
+            else:
+                lab_attendence_mark = 0
+            
+            lab_report = request.POST.get(f'lab_report_{stu.student_id}')
+            if lab_report:
+                lab_report_mark = (float(lab_report))
+            else:
+                lab_report_mark = 0
+
+            lab_quize = request.POST.get(f'lab_quize_{stu.student_id}')
+            if lab_quize:
+                lab_quize_mark = (float(lab_quize))
+            else:
+                lab_quize_mark = 0
+            lab_total_mark = lab_attendence_mark + lab_report_mark + lab_quize_mark
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                lab_attendence = lab_attendence_mark,
+                lab_report = lab_report_mark,
+                lab_quize = lab_quize_mark,
+                lab_total_mark = lab_total_mark,
+            )
+            checker = Lab_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    lab_attendence = lab_attendence_mark,
+                    lab_report = lab_report_mark,
+                    lab_quize = lab_quize_mark,
+                    lab_total_mark = lab_total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+
+            lab_attendence = request.POST.get(f'lab_attendence_{stu.student_id}')
+            
+            if lab_attendence:
+                lab_attendence_mark = (float(lab_attendence))
+            else:
+                lab_attendence_mark = 0
+            
+            lab_report = request.POST.get(f'lab_report_{stu.student_id}')
+            if lab_report:
+                lab_report_mark = (float(lab_report))
+            else:
+                lab_report_mark = 0
+
+            lab_quize = request.POST.get(f'lab_quize_{stu.student_id}')
+            if lab_quize:
+                lab_quize_mark = (float(lab_quize))
+            else:
+                lab_quize_mark = 0
+            lab_total_mark = lab_attendence_mark + lab_report_mark + lab_quize_mark
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                lab_attendence = lab_attendence_mark,
+                lab_report = lab_report_mark,
+                lab_quize = lab_quize_mark,
+                lab_total_mark = lab_total_mark,
+            )
+            checker = Lab_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    lab_attendence = lab_attendence_mark,
+                    lab_report = lab_report_mark,
+                    lab_quize = lab_quize_mark,
+                    lab_total_mark = lab_total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+
+        return HttpResponseRedirect(f'/faculty/show_lab_marks/{course_code}/')
+
+
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/edit_lab_marks.html', context)
+
+def show_final_50_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Lab_Final_50_Marks.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+    backLog_students = Lab_Final_50_Marks.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+    special_students = Lab_Final_50_Marks.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/show_final_50_marks.html', context)
+
+def edit_lab_final_50_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Lab_Final_50_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Lab_Final_50_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Lab_Final_50_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            final_practical_exam = request.POST.get(f'final_practical_exam_{stu.student_id}')
+            if final_practical_exam:
+                final_practical_exam = float(final_practical_exam)
+            else:
+                final_practical_exam = 0
+            
+            viva_voce = request.POST.get(f'viva_voce_{stu.student_id}')
+            if viva_voce:
+                viva_voce = float(viva_voce)
+            else:
+                viva_voce = 0
+            total_mark = final_practical_exam + viva_voce
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Final_50_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                final_practical_exam = final_practical_exam,
+                viva_voce = viva_voce,
+                total_mark = total_mark,
+            )
+            checker = Lab_Final_50_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Final_50_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    final_practical_exam = final_practical_exam,
+                    viva_voce = viva_voce,
+                    total_mark = total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            final_practical_exam = request.POST.get(f'final_practical_exam_{stu.student_id}')
+            if final_practical_exam:
+                final_practical_exam = float(final_practical_exam)
+            else:
+                final_practical_exam = 0
+            
+            viva_voce = request.POST.get(f'viva_voce_{stu.student_id}')
+            if viva_voce:
+                viva_voce = float(viva_voce)
+            else:
+                viva_voce = 0
+            total_mark = final_practical_exam + viva_voce
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Final_50_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                final_practical_exam = final_practical_exam,
+                viva_voce = viva_voce,
+                total_mark = total_mark,
+            )
+            checker = Lab_Final_50_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Final_50_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    final_practical_exam = final_practical_exam,
+                    viva_voce = viva_voce,
+                    total_mark = total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            final_practical_exam = request.POST.get(f'final_practical_exam_{stu.student_id}')
+            if final_practical_exam:
+                final_practical_exam = float(final_practical_exam)
+            else:
+                final_practical_exam = 0
+            
+            viva_voce = request.POST.get(f'viva_voce_{stu.student_id}')
+            if viva_voce:
+                viva_voce = float(viva_voce)
+            else:
+                viva_voce = 0
+            total_mark = final_practical_exam + viva_voce
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Lab_Final_50_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                final_practical_exam = final_practical_exam,
+                viva_voce = viva_voce,
+                total_mark = total_mark,
+            )
+            checker = Lab_Final_50_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Lab_Final_50_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    final_practical_exam = final_practical_exam,
+                    viva_voce = viva_voce,
+                    total_mark = total_mark,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_final_50_marks/{course_code}/')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/edit_lab_final_50_marks.html', context)
+
+def project_course_details(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
+    context = {
+    'c_code' : (course.course_code),
+    'c_name' : (course.course_name),
+    'c_credit' : (course.credit),
+    'c_teacher' : course.course_teacher,
+    'regular_students': regular_students,
+    'backLogStudents': backLogStudents,
+    'special_students': special_students,
+    }
+    return render(request, 'faculty/project_course_details.html', context)
+
+def project_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    checker = Project_Marks.objects.filter(course_code= course_code)
+    for c in checker:
+        return HttpResponseRedirect(f'/faculty/edit_project_marks/{course_code}/')
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    count = 0
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_project_marks/{course_code}')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/project_marks.html', context)
+
+def viva_course_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    checker = Viva_Marks.objects.filter(course_code= course_code)
+    for c in checker:
+        return HttpResponseRedirect(f'/faculty/edit_viva_marks/{course_code}/')
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    count = 0
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            viva_marks = request.POST.get(f'viva_marks_{stu.student_id}')
+            if viva_marks:
+                viva_marks_100 = float(viva_marks)
+            else:
+                viva_marks_100 = 0
+            
+            total_marks_100 = viva_marks_100
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Viva_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                total_mark = total_marks_100,
+            )
+            checker = Viva_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Viva_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            viva_marks = request.POST.get(f'viva_marks_{stu.student_id}')
+            if viva_marks:
+                viva_marks_100 = float(viva_marks)
+            else:
+                viva_marks_100 = 0
+            
+            total_marks_100 = viva_marks_100
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Viva_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                total_mark = total_marks_100,
+            )
+            checker = Viva_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Viva_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            viva_marks = request.POST.get(f'viva_marks_{stu.student_id}')
+            if viva_marks:
+                viva_marks_100 = float(viva_marks)
+            else:
+                viva_marks_100 = 0
+            
+            total_marks_100 = viva_marks_100
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Viva_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                total_mark = total_marks_100,
+            )
+            checker = Viva_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Viva_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_viva_marks/{course_code}')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/viva_course_marks.html', context)
+
+def research_project_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    checker = Research_Project_Marks.objects.filter(course_code= course_code)
+    for c in checker:
+        return HttpResponseRedirect(f'/faculty/edit_research_project_marks/{course_code}/')
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    count = 0
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Research_Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Research_Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Research_Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Research_Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Research_Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Research_Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Research_Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Research_Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Research_Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_research_project_marks/{course_code}')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/research_project_marks.html', context)
+
+def show_project_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Project_Marks.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+    backLog_students = Project_Marks.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+    special_students = Project_Marks.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/show_project_marks.html', context)
+
+def show_viva_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Viva_Marks.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+    backLog_students = Viva_Marks.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+    special_students = Viva_Marks.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/show_viva_marks.html', context)
+
+def show_research_project_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
+    backLog_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
+    special_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/show_research_project_marks.html', context)
+
+def edit_project_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Project_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Project_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Project_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    count = 0
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_project_marks/{course_code}')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/edit_project_marks.html', context)
+
+def edit_viva_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Viva_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Viva_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Viva_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    count = 0
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            viva_marks = request.POST.get(f'viva_marks_{stu.student_id}')
+            if viva_marks:
+                viva_marks_100 = float(viva_marks)
+            else:
+                viva_marks_100 = 0
+            
+            total_marks_100 = viva_marks_100
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Viva_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                total_mark = total_marks_100,
+            )
+            checker = Viva_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Viva_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            viva_marks = request.POST.get(f'viva_marks_{stu.student_id}')
+            if viva_marks:
+                viva_marks_100 = float(viva_marks)
+            else:
+                viva_marks_100 = 0
+            
+            total_marks_100 = viva_marks_100
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Viva_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                total_mark = total_marks_100,
+            )
+            checker = Viva_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Viva_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            viva_marks = request.POST.get(f'viva_marks_{stu.student_id}')
+            if viva_marks:
+                viva_marks_100 = float(viva_marks)
+            else:
+                viva_marks_100 = 0
+            
+            total_marks_100 = viva_marks_100
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Viva_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                total_mark = total_marks_100,
+            )
+            checker = Viva_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Viva_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_viva_marks/{course_code}')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/edit_viva_marks.html', context)
+
+def edit_research_project_marks(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    count = 0
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'count': count}
+        submit_button = True
+    if request.method == 'POST':
+        for stu in regular_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Research_Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Research_Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Research_Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in backLog_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Research_Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Research_Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Research_Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        for stu in special_students:
+            supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
+            if supervisor_marks:
+                supervisor_marks_70 = float(supervisor_marks)
+            else:
+                supervisor_marks_70 = 0
+            
+            defence_marks = request.POST.get(f'defence_marks_{stu.student_id}')
+            if defence_marks:
+                defence_marks_30 = float(defence_marks)
+            else:
+                defence_marks_30 = 0
+            total_marks_100 = supervisor_marks_70 + defence_marks_30
+
+            student = Student.objects.get(student_id= stu.student_id)
+            data = Research_Project_Marks(
+                student_id = student.student_id,
+                student_name = student.first_name + " " + student.last_name,
+                session = student.session,
+                semester_no = course.semister_no,
+                course_code = course_code,
+                course_name = course.course_name,
+                credit = course.credit,
+                remarks = stu.remarks,
+                supervisor_marks = supervisor_marks_70,
+                defence_marks = defence_marks_30,
+                total_mark = total_marks_100,
+            )
+            checker = Research_Project_Marks.objects.filter(course_code= course_code, student_id = student.student_id)
+            flag = False
+            for c in checker:
+                flag = True
+                id = c.id
+            if flag == True:
+                data = Research_Project_Marks(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course_code,
+                    course_name = course.course_name,
+                    credit = course.credit,
+                    remarks = stu.remarks,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_mark = total_marks_100,
+                )
+                data.save()
+            else:
+                data.save()
+        return HttpResponseRedirect(f'/faculty/show_research_project_marks/{course_code}')
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'submit_button': submit_button,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/edit_research_project_marks.html', context)
+
+def consoilated_project_marksheet(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Project_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Project_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Project_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        project_marks_checker = Project_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in project_marks_checker:
+            total_marks_100 = c.total_mark
+            supervisor_marks_70 = c.supervisor_marks
+            defence_marks_30 = c.defence_marks
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'supervisor_marks_70': supervisor_marks_70, 'defence_marks_30': defence_marks_30,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        data = Final_MarkSheet_Project_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            supervisor_marks = supervisor_marks_70,
+            defence_marks = defence_marks_30,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Project_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Project_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        project_marks_checker = Project_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in project_marks_checker:
+            total_marks_100 = c.total_mark
+            supervisor_marks_70 = c.supervisor_marks
+            defence_marks_30 = c.defence_marks
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'supervisor_marks_70': supervisor_marks_70, 'defence_marks_30': defence_marks_30,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        data = Final_MarkSheet_Project_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            supervisor_marks = supervisor_marks_70,
+            defence_marks = defence_marks_30,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Project_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Project_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        project_marks_checker = Project_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in project_marks_checker:
+            total_marks_100 = c.total_mark
+            supervisor_marks_70 = c.supervisor_marks
+            defence_marks_30 = c.defence_marks
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'supervisor_marks_70': supervisor_marks_70, 'defence_marks_30': defence_marks_30,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        data = Final_MarkSheet_Project_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            supervisor_marks = supervisor_marks_70,
+            defence_marks = defence_marks_30,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Project_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Project_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    supervisor_marks = supervisor_marks_70,
+                    defence_marks = defence_marks_30,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/consoilated_project_marksheet.html', context)
+
+def consoilated_research_project_marksheet(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Research_Project_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    submit_button = False
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        project_marks_checker = Research_Project_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in project_marks_checker:
+            total_marks_100 = c.total_mark
+            supervisor_marks_70 = c.supervisor_marks
+            defence_marks_30 = c.defence_marks
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'supervisor_marks_70': supervisor_marks_70, 'defence_marks_30': defence_marks_30,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        project_marks_checker = Research_Project_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in project_marks_checker:
+            total_marks_100 = c.total_mark
+            supervisor_marks_70 = c.supervisor_marks
+            defence_marks_30 = c.defence_marks
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'supervisor_marks_70': supervisor_marks_70, 'defence_marks_30': defence_marks_30,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        project_marks_checker = Research_Project_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in project_marks_checker:
+            total_marks_100 = c.total_mark
+            supervisor_marks_70 = c.supervisor_marks
+            defence_marks_30 = c.defence_marks
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'supervisor_marks_70': supervisor_marks_70, 'defence_marks_30': defence_marks_30,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/consoilated_research_project_marksheet.html', context)
+
+def consoilated_viva_marksheet(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Viva_Marks.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Viva_Marks.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
+    special_students = Viva_Marks.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
+    count = 0
+    regular_student = {}
+    backlog_student = {}
+    special_student = {}
+    for stu in regular_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        viva_marks_checker = Viva_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in viva_marks_checker:
+            total_marks_100 = c.total_mark
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        data = Final_MarkSheet_Viva_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Viva_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Viva_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    for stu in backLog_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        viva_marks_checker = Viva_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in viva_marks_checker:
+            total_marks_100 = c.total_mark
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        data = Final_MarkSheet_Viva_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Viva_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Viva_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    for stu in special_students:
+        student = Student.objects.get(student_id= stu.student_id)
+        viva_marks_checker = Viva_Marks.objects.filter(student_id = stu.student_id, course_code= course_code)
+        total_marks_100 = 0
+        for c in viva_marks_checker:
+            total_marks_100 = c.total_mark
+          
+        if total_marks_100 >= 80:
+            LG = 'A+'
+            GP = 4.00
+        elif (total_marks_100 > 74 and total_marks_100 < 80):
+            LG = 'A'
+            GP = 3.75
+        elif (total_marks_100 > 69 and total_marks_100 < 75):
+            LG = 'A-'
+            GP = 3.50
+        elif (total_marks_100 > 64 and total_marks_100 < 70):
+            LG = 'B'
+            GP = 3.25
+        elif (total_marks_100 > 59 and total_marks_100 < 65):
+            LG = 'B'
+            GP = 3.00
+        elif (total_marks_100 > 54 and total_marks_100 < 60):
+            LG = 'B-'
+            GP = 2.75
+        elif (total_marks_100 > 49 and total_marks_100 < 55):
+            LG = 'C+'
+            GP = 2.50
+        elif (total_marks_100 > 44 and total_marks_100 < 50):
+            LG = 'C'
+            GP = 2.25
+        elif (total_marks_100 > 39 and total_marks_100 < 45):
+            LG = 'D'
+            GP = 2.00
+        else:
+            LG = 'F'
+            GP = 0.00
+        PS = course.credit * GP
+        count += 1
+        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
+        'total_marks_100': total_marks_100, 'LG': LG, 'GP': GP, 'PS': PS, 'count': count}
+        data = Final_MarkSheet_Viva_Course(
+            student_id = student.student_id,
+            student_name = student.first_name + " " + student.last_name,
+            session = student.session,
+            semester_no = course.semister_no,
+            course_code = course.course_code,
+            credits = course.credit,
+            remarks = stu.remarks,
+            hall = student.hall,
+            total_marks = total_marks_100,
+            GP = GP,
+            PS = PS,
+            LG = LG,
+        )
+        checker = Final_MarkSheet_Viva_Course.objects.filter(student_id = student.student_id, course_code= course_code)
+        flag = False
+        for c in checker:
+            id = c.id
+            flag = True
+        if flag == True:
+            data = Final_MarkSheet_Viva_Course(
+                    id = id,
+                    student_id = student.student_id,
+                    student_name = student.first_name + " " + student.last_name,
+                    session = student.session,
+                    semester_no = course.semister_no,
+                    course_code = course.course_code,
+                    credits = course.credit,
+                    remarks = stu.remarks,
+                    hall = student.hall,
+                    total_marks = total_marks_100,
+                    GP = GP,
+                    PS = PS,
+                    LG = LG,
+                )
+            data.save()
+        else:
+            data.save()
+    context = {
+        'semister_no': course.semister_no,
+        'c_code': course_code,
+        'c_teacher': course.course_teacher,
+        'credit': course.credit,
+        'c_name': course.course_name,
+        'regular_student': regular_student,
+        'backlog_student': backlog_student,
+        'special_student': special_student,
+    }
+    return render(request, 'faculty/consoilated_viva_marksheet.html', context)
+
+def research_project_course_details(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
+    context = {
+    'c_code' : (course.course_code),
+    'c_name' : (course.course_name),
+    'c_credit' : (course.credit),
+    'c_teacher' : course.course_teacher,
+    'regular_students': regular_students,
+    'backLogStudents': backLogStudents,
+    'special_students': special_students,
+    }
+    return render(request, 'faculty/research_project_course_details.html', context)
+
+def viva_project_course_details(request, course_code):
+    course = Course.objects.get(course_code= course_code)
+    regular_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Regular').order_by('student_id')
+    backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='BackLog').order_by('student_id')
+    special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks='Special').order_by('student_id')
+    count = 0
+    backLogStudents = {}
+    for stu in regular_students:
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        backLogStudents[stu] = count
+    context = {
+    'c_code' : (course.course_code),
+    'c_name' : (course.course_name),
+    'c_credit' : (course.credit),
+    'c_teacher' : course.course_teacher,
+    'regular_students': regular_students,
+    'backLogStudents': backLogStudents,
+    'special_students': special_students,
+    }
+    return render(request, 'faculty/viva_project_course_details.html', context)

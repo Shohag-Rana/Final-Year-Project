@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponseRedirect
-from . models import ExamController, Student, Teacher, Teacher_email, UserManager, OfficeStuff
+from . models import ExamController, Student, Teacher, Teacher_email, UserManager, OfficeStuff, ExamCommitte
 from . forms import StudentRegForm, LoginForm, TeacherRegForm, OfficeStuffRegForm, ExamControllerRegForm, ExamCommitteRegForm
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
@@ -103,6 +103,10 @@ def user_login(request):
                     exam_controller = ExamController.objects.filter(email=mail)
                     for s in exam_controller:
                         return HttpResponseRedirect('/exam_controller/profile/')
+
+                    exam_committe = ExamCommitte.objects.filter(email=mail)
+                    for s in exam_committe:
+                        return HttpResponseRedirect('/examcommitte/profile/')
                 else:
                     messages.error(request, 'wrong user enter correct one')
                     fm = LoginForm()

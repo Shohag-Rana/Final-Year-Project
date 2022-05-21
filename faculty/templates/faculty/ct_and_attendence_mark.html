@@ -77,33 +77,50 @@ input[type=number] {
                 </div>
             <form action="" method="POST">
                 {% csrf_token %}
-                <table class="table table-bordered">
+                <table class="table table-bordered text-center">
                     <thead>
                         <tr>
                             <th scope="col">SI NO</th>
                             <th scope="col">Student ID</th>
                             <th scope="col">Name of the Candidates</th>
-                            <th scope="col">Class Attendence (10%)</th>
                             <th scope="col">Class Test/Assignment (20%)</th>
+                            <th scope="col">Class Attendence (10%)</th>
                             <th scope="col">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for student in regular_students %}
+                    {% for student, mark in regularStudents.items %}
                         <tr>
                             <td>{{forloop.counter}}</td>
                             <td>{{student.student_id}}</td>
                             <td>{{student.student_name}}</td>
+                            {% if mark.ct_marks %}
                             <td>
                                 <div class="form-group">
-                                    <input type="number" max="10" min="0" name="{{student.student_name}}" class="form-control">
+                                    <input type="number" value="{{mark.ct_marks}}" max="20" min="0" name="{{student.student_name}}" class="form-control text-center">
                                 </div>
                             </td>
+                            {% else %}
                             <td>
                                 <div class="form-group">
-                                    <input type="number" max="20" min="0" name="{{student.student_id}}" class="form-control">
+                                    <input type="number" max="20" min="0" name="{{student.student_name}}" class="form-control text-center">
                                 </div>
                             </td>
+                            {% endif %}
+
+                            {% if mark.attendence_mark %}
+                            <td>
+                                <div class="form-group">
+                                    <input type="number" value="{{mark.attendence_mark}}" max="10" min="0" name="{{student.student_id}}" class="form-control text-center">
+                                </div>
+                            </td>
+                            {% else %}
+                            <td>
+                                <div class="form-group">
+                                    <input type="number" max="10" min="0" name="{{student.student_id}}" class="form-control text-center">
+                                </div>
+                            </td>
+                            {% endif %}
                             {% if student.remarks == 'BackLog' %}
                                 <td class="text-danger">{{student.remarks}}</td>
                             {% else %}
@@ -111,21 +128,38 @@ input[type=number] {
                             {% endif %}
                         </tr>
                     {% endfor %}
-                    {% for student, count in backLogStudents.items %}
+                    {% for student, mark in backLogStudents.items %}
                     <tr>
-                        <td>{{count}}</td>
+                        <td>{{mark.count}}</td>
                         <td>{{student.student_id}}</td>
                         <td>{{student.student_name}}</td>
+                        {% if mark.ct_marks %}
                         <td>
                             <div class="form-group">
-                                <input type="number" max="10" min="0" name="{{student.student_name}}" class="form-control">
+                                <input type="number" value="{{mark.ct_marks}}" max="20" min="0" name="{{student.student_name}}" class="form-control text-center">
                             </div>
                         </td>
+                        {% else %}
                         <td>
                             <div class="form-group">
-                                <input type="number" max="20" min="0" name="{{student.student_id}}" class="form-control">
+                                <input type="number" max="20" min="0" name="{{student.student_name}}" class="form-control text-center">
                             </div>
                         </td>
+                        {% endif %}
+
+                        {% if mark.attendence_mark %}
+                        <td>
+                            <div class="form-group">
+                                <input type="number" value="{{mark.attendence_mark}}" max="10" min="0" name="{{student.student_id}}" class="form-control text-center">
+                            </div>
+                        </td>
+                        {% else %}
+                        <td>
+                            <div class="form-group">
+                                <input type="number" max="10" min="0" name="{{student.student_id}}" class="form-control text-center">
+                            </div>
+                        </td>
+                        {% endif %}
                         {% if student.remarks == 'BackLog' %}
                             <td class="text-danger">{{student.remarks}}</td>
                         {% else %}
@@ -133,28 +167,45 @@ input[type=number] {
                         {% endif %}
                     </tr>
                 {% endfor %}
-                {% for student in special_students %}
-                        <tr>
-                            <td>{{forloop.counter}}</td>
-                            <td>{{student.student_id}}</td>
-                            <td>{{student.student_name}}</td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" max="10" min="0" name="{{student.student_name}}" class="form-control">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" max="20" min="0" name="{{student.student_id}}" class="form-control">
-                                </div>
-                            </td>
-                            {% if student.remarks == 'Special' %}
-                                <td class="text-danger">{{student.remarks}}</td>
-                            {% else %}
-                                <td>{{student.remarks}}</td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
+                {% for student, mark in specialStudents.items %}
+                    <tr>
+                        <td>{{mark.count}}</td>
+                        <td>{{student.student_id}}</td>
+                        <td>{{student.student_name}}</td>
+                        {% if mark.ct_marks %}
+                        <td>
+                            <div class="form-group">
+                                <input type="number" value="{{mark.ct_marks}}" max="20" min="0" name="{{student.student_name}}" class="form-control text-center">
+                            </div>
+                        </td>
+                        {% else %}
+                        <td>
+                            <div class="form-group">
+                                <input type="number" max="20" min="0" name="{{student.student_name}}" class="form-control text-center">
+                            </div>
+                        </td>
+                        {% endif %}
+
+                        {% if mark.attendence_mark %}
+                        <td>
+                            <div class="form-group">
+                                <input type="number" value="{{mark.attendence_mark}}" max="10" min="0" name="{{student.student_id}}" class="form-control text-center">
+                            </div>
+                        </td>
+                        {% else %}
+                        <td>
+                            <div class="form-group">
+                                <input type="number" max="10" min="0" name="{{student.student_id}}" class="form-control text-center">
+                            </div>
+                        </td>
+                        {% endif %}
+                        {% if student.remarks == 'BackLog' %}
+                            <td class="text-danger">{{student.remarks}}</td>
+                        {% else %}
+                            <td>{{student.remarks}}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
                 </tbody>
                 </table>
             <input type="submit" value="Save" class="btn btn-success w-100">

@@ -116,10 +116,11 @@ input[type="number"]{
      
     </div>
     <div class="row">
-      <div class="col-11"></div>
-      <div class="col-1">
-        <a href="" type="button" class="btn btn-success w-100">Save</a>
+      <div class="col-2">
+        <a href={% url 'exam_committe_course_details' c_code%} type="button" class="btn btn-info w-100">Course Home</a>
       </div>
+        <div class="col-8"></div>
+        <div class="col-2"><input type="submit" class="btn btn-success w-100" value="Submit"></div>
     </div>
 </div>
 {% endblock content2 %}

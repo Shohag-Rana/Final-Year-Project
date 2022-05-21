@@ -47,8 +47,7 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <a class="dropdown-item" href={% url 'exam_committte_current_courses' %}>Current Courses</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href={% url 'exam_committte_special_courses' %}>Special Courses</a><div class="dropdown-divider"></div>
-               
+              <a class="dropdown-item" href={% url 'exam_committte_special_courses' %}>Special Courses</a>
             </div>
           </li>
           <li class="nav-item  dropdown">
@@ -61,17 +60,11 @@
               aria-haspopup="true"
               aria-expanded="false"
             >
-             Semester
+             Results
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Current Semester</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Complete Semester</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Incomplete Semester</a>
-               
+              <a class="dropdown-item" href={% url 'semester_final_result' '3rd Year 1st Semester' %}>3rd Year 1st Semester</a><div class="dropdown-divider"></div>
             </div>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="#">Result</a>
           </li>
           <li class="nav-item">
             <a class="nav-link active" href={% url 'exam_committe_logout' %}>LogOut</a>

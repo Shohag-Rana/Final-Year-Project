@@ -57,13 +57,13 @@ input[type=number]{
                 <h6 class="text-center">{{semister_no}} B.Sc. (Engg.) Final Examination, 202*</h6>
                 <div class="row mt-4">
                     <div class="col-4">
-                        <h6>Course Code: {{c_code}} </h6>
+                        <h6>Course Code: {{course_code}} </h6>
                     </div>
                     <div class="col-4">
                         <h6 class="credit-margin">Credit Hours: {{credit}}</h6>
                     </div>
                     <div class="col-4">
-                        <h6>Course Title: {{c_name}}</h6>
+                        <h6>Course Title: {{course_name}}</h6>
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@ input[type=number]{
                             <th scope="col">7</th>
                             <th scope="col">8</th>
                             <th scope="col">9</th>
-                            <th scope="col">Total Marks</th>
+                            <th scope="col">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -152,7 +152,7 @@ input[type=number]{
                                 <td><div class="form-group"><input max= "10" min= "0" type="number" value="{{student.q9}}" name="question9_{{student.student_id}}" class="form-control"></div></td>
                             {% endif %}
 
-                            <td></td>
+                            <td>{{student.remarks}}</td>
                         </tr>
                     {% endfor %}
 
@@ -214,7 +214,7 @@ input[type=number]{
                                 <td><div class="form-group"><input max= "10" min= "0" type="number" value="{{student.q9}}" name="question9_{{student.student_id}}" class="form-control"></div></td>
                             {% endif %}
 
-                            <td></td>
+                            <td>{{student.remarks}}</td>
                         </tr>
                     {% endfor %}
                     {% for student in special_students_theory_marks %}
@@ -275,12 +275,16 @@ input[type=number]{
                                 <td><div class="form-group"><input max= "10" min= "0" type="number" value="{{student.q9}}" name="question9_{{student.student_id}}" class="form-control"></div></td>
                             {% endif %}
 
-                            <td></td>
+                            <td>{{student.remarks}}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
                 </table>
-            <input max= "10" type="submit" value="Save" class="btn btn-success w-100">
+                <div class="row">
+                    <div class="col-10"></div>
+                    <div class="col-2"><input max= "10" type="submit" value="Save" class="btn btn-success w-100"></div>
+                </div>
+            
             </form>
             </div>
             

@@ -108,12 +108,11 @@ input[type='number']{
       </tbody>
     </table>
     <div class="row">
-      <div class="col-10"></div>
       <div class="col-2">
-        {% if save_button == True %}
-          <input type="submit" value="Save" class="btn btn-success w-100">
-        {% endif %}
+        <a href={% url 'exam_committe_course_details' c_code%} type="button" class="btn btn-info w-100">Course Home</a>
       </div>
+        <div class="col-8"></div>
+        <div class="col-2"><input type="submit" class="btn btn-success w-100" value="Submit"></div>
     </div>
   </form>
   </div>

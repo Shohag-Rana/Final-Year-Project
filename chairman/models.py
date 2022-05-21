@@ -15,6 +15,9 @@ semister = (
 course_types = (
     ('Theory', 'Theory'),
     ('Lab', 'Lab'),
+    ('Project', 'Project'),
+    ('Research_Project', 'Research_Project'),
+    ('Viva', 'Viva'),
     ('None', 'None'),
 )
 session_list = (
