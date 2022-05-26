@@ -242,18 +242,10 @@ def ct_and_attendence_mark(request, course_code):
         course = Course.objects.get(course_code= course_code)
         students = Teacher_Student_Info.objects.filter(course_code= course_code)
         ct_attend_marks = Attendence_and_CT_Mark.objects.filter(course_code= course_code)
-        context = {
-            'semister_no': course.semister_no,
-            'c_code': course_code,
-            'c_teacher': course.course_teacher,
-            'credit': course.credit,
-            'c_name': course.course_name,
-            'students': students,
-            'ct_attend_marks': ct_attend_marks,
-            }
+
         for student in students:
-            ct_marks = request.POST.get(f'{student.student_id}')
-            attend_marks = request.POST.get(f'{student.student_name}')
+            ct_marks = request.POST.get(f'ct_marks_{student.student_id}')
+            attend_marks = request.POST.get(f'attendence_mark_{student.student_id}')
             if ct_marks and attend_marks:
                 ct_marks = (float(ct_marks))
                 attend_marks = (float(attend_marks))

@@ -25,6 +25,18 @@ th{
 .table-padding{
     padding: 0px 20px;
 }
+.img-div{
+    margin-left: 150px
+}
+.navbar{
+    width: 2550px;
+}
+.footer{
+    width: 2550px;
+}
+.owner{
+    width: 2550px;
+}
 
 {% endblock mystyle %}
    
@@ -47,19 +59,152 @@ th{
 </div>
 {% endblock content1 %}
 {% block content2 %}
-    <div class="container">
-        <div class="row">
-            <div class="col-3">
-                <img src="https://i.ibb.co/rMJ1HWV/OIP.jpg" alt="OIP" height="180px" width="70%">
+    {% comment %} <div class="container"> {% endcomment %}
+        <div class="row" style="width: 2500px">
+            <div class="col-3 mt-2 p-3" style="margin-left: 70px">
+                <p><b>Letter Grades and corresponding Grade Points Shall be determined as follows:</b></p>
+                <table class="table table-hover table-striped text-center table-bordered">
+                    <thead>
+                      <tr>
+                        <th scope="col">Numerical grade</th>
+                        <th scope="col">Letter grade</th>
+                        <th scope="col">Grade point</th>
+                        <th scope="col">No. of students receiving the grades</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>80% and above</td>
+                            <td>A+</td>
+                            <td>4.00</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>75% to less than 80%</td>
+                            <td>A</td>
+                            <td>3.75</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>70% to less than 75%</td>
+                            <td>A-</td>
+                            <td>3.50</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>65% to less than 70%</td>
+                            <td>B+</td>
+                            <td>3.25</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>60% to less than 65%</td>
+                            <td>B</td>
+                            <td>3.00</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>55% to less than 60%</td>
+                            <td>B-</td>
+                            <td>2.75</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>50% to less than 55%</td>
+                            <td>C+</td>
+                            <td>2.50</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>45% to less than 50%</td>
+                            <td>C</td>
+                            <td>2.25</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>40% to less than 45%</td>
+                            <td>D</td>
+                            <td>2.00</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>Less than 40%</td>
+                            <td>F</td>
+                            <td>0.00</td>
+                            <td>#</td>
+                        </tr>
+                        <tr>
+                            <td>Withdrawn</td>
+                            <td>W</td>
+                            <td>-</td>
+                            <td>#</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="col-9 mt-3">
-                <h2 class="text-center">Mawlana Bhashani Science and Technology University</h2>
-                <h4 class="text-center">Department of Computer Science and Engineering</h4>
-                <h6 class="text-center text-danger mb-3">{{semester_no}} B.Sc. (Engg.) Final Examination, 202*</h6>
-                <h6 class="text-center">Held in: January - February 2022</h6>
+            <div class="col-7">
+                <div class="row">
+                    <div class="col-1 img-div">
+                        <img src="https://i.ibb.co/rMJ1HWV/OIP.jpg" alt="OIP" height="150px" width="200px">
+                    </div>
+                    <div class="col-9 mt-3">
+                        <h2 class="text-center">Mawlana Bhashani Science and Technology University</h2>
+                        <h6 class="text-center">Santosh, Tangail, Bangladesh</h6>
+                        <h4 class="text-center">Tabulation Sheet</h4>
+                        <h6 class="text-center">Department:...............................................................................................................................................................</h6>
+                        <h6 class="text-center">........................Year.............................Semester B.Sc(Engg./Hons.)/BSS(Hons.)/BBA/B.Pharm. Final Examination, 20.................</h6>
+                        <h6 class="text-center">Held in: ................................................ Session: ......................................</h6>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        <h6><b><u>Note:</u></b></h6>
+                        <h6><b>MO</b> = Mark Obtained</h6>
+                      
+                    </div>
+                    <div class="col-9"></div>
+                </div>
+                <div class="row">
+                    <div class="col-3">
+                        <h6>      <b>LG</b> = Letter Grade</h6>
+                        <h6>      <b>PS</b> = Point Secured = GP * Credit</h6>
+                        
+                        <h6>      <b>CT</b> = Credits Taken/CO = Credits Offered</h6>
+                        <h6>      <b>CE</b> = Credits Earned</h6>
+                        <h6>      Total Point Secured(<b>TPS</b> ) = SUM(<b>PS</b> )</h6>
+                        <h6>      Grade Points Average(<b>GPA</b> ) = TPS/CE/TPS/CO</h6>
+                    </div>
+                    <div class="col-5">
+                        <h6><b>JAMH</b>  = Jananeta Abdul Mannan Hall</h6>
+                        <h6><b> AKBH</b> = Alema Khatun Bhashani Hall</h6>
+                        <h6><b>BSMRH</b>  = Bangabandhu Sheikh Mujibur Rahman Hall</h6>
+                        <h6><b>SZRH</b>  = Shaheed Ziaur Rahman Hall</h6>
+                        <h6><b> SJJH</b> = Shaheed Janani Jahanara Imam Hall</h6>
+                        <h6><b>SRH</b>  = Sheikh Rasel Hall</h6>
+                    </div>
+                    <div class="col-4"></div>
+                </div>
+            </div>
+            <div class="col-2 mt-3" style="margin-left: -70px">
+                <table class="table table-hover table-striped table-bordered">
+                    <thead>
+                      <tr>
+                        <th scope="col" style="width: 100px !important">Course Code</th>
+                        <th scope="col">Course Title</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for course in courses %}
+                            <tr>
+                                <td>{{course.course_code}}</td>
+                                <td>{{course.course_name}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
+    {% comment %} </div> {% endcomment %}
         <div class="row mt-5 table-padding">
             <table class="table table-hover table-striped text-center table-bordered">
                 <thead>
@@ -69,7 +214,7 @@ th{
                     <th scope="col">Student ID</th>
                     <th scope="col" style="width: 200px">Name of the Candidates</th>
                     {% for course in courses %}
-                    <th scope="col">{{course.course_code}}</th>
+                    <th scope="col" colspan="4">Course Code: <br> <span><u>{{course.course_code}}</u></span> <br> Credit: <span><u>{{course.credit}}</u></span> </th>
                     {% endfor %}
                     <th scope="col">CT</th>
                     <th scope="col">CE</th>
@@ -82,9 +227,23 @@ th{
                     <tr>
                         <td colspan="4">Credits</td>
                         {% for course in courses %}
-                        <td>{{course.credit}}</td>
+                        <td colspan="4">{{course.credit}}</td>
                         {% endfor %}
                         <td>{{total_credit}}</td>
+                        <td>#</td>
+                        <td>#</td>
+                        <td>#</td>
+                        <td>#</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4"></td>
+                        {% for course in courses %}
+                            <td>MO(%)</td>
+                            <td>LG</td>
+                            <td>GP</td>
+                            <td>PS</td>
+                        {% endfor %}
+                        <td>#</td>
                         <td>#</td>
                         <td>#</td>
                         <td>#</td>
@@ -97,8 +256,16 @@ th{
                             <td>{{student.student_id}}</td>
                             <td>{{student.first_name}} {{student.last_name}}</td>
                             {% for key, value in ps_value.items %}
-                                <td>{{value}}</td>
+                                {% for k, v in value.items %}
+                                    <td>{{v}}</td>
+                                {% endfor %}
                             {% endfor %}
+                            <td>{{ps_value.total_credit}}</td>
+                            <td>{{ps_value.credit_earn}}</td>
+                            <td>{{ps_value.tps}}</td>
+                            <td>{{ps_value.gpa}}</td>
+                            <td>{{ps_value.result}}</td>
+                          
                         </tr>
                     {% endfor %}
                     {% for student, mark in backlog_student.items %}
@@ -132,6 +299,16 @@ th{
 
 {% block script %}
   {{block.super}}
+  <script>
+    $(document).ready(function() {
+        $('#example').DataTable( {
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ]
+        } );
+    } );
+  </script>
 {% endblock script %}
   
   </body>

@@ -2753,7 +2753,7 @@ def semester_final_result(request, semester_no):
     students = Registration_By_Semester.objects.all()
     student_info ={}
     for student in students:
-        student_details = {}
+        course_details = {}
         credit_earn = 0
         total_credit = 0
         tps = 0
@@ -2764,29 +2764,88 @@ def semester_final_result(request, semester_no):
             total_credit += course.credit
             if course.course_type == 'Theory':
                 ps = Final_MarkSheet_Theory_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
+                
             if course.course_type == 'Lab':
                 ps = Final_MarkSheet_Lab_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
+                
             if course.course_type == 'Viva':
                 ps = Final_MarkSheet_Viva_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
+                
             if course.course_type == 'Project':
                 ps = Final_MarkSheet_Project_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
+               
             if course.course_type == 'Research_Project':
                 ps = Final_MarkSheet_Project_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
+                
             flag = False
+            credit = 0
+
             for main_course in courses:
                 if main_course.course_code == c.course_code:
                     flag = True
+                    credit = main_course.credit
                     break
+                
             if flag == True:
-                student_details[f'{c.course_code}'] = ps.PS
                 tps += ps.PS
                 if ps.PS == 0:
                     credit_earn += 0
                 else:
                     credit_earn += main_course.credit
+                total_marks = ps.total_marks
+                if total_marks >= 80:
+                    c_lg = 'A+'
+                    c_gp = 4.00
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 75:
+                    c_lg = 'A'
+                    c_gp = 3.75
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 70:
+                    c_lg = 'A-'
+                    c_gp = 3.50
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 65:
+                    c_lg = 'B+'
+                    c_gp = 3.25
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 60:
+                    c_lg = 'B'
+                    c_gp = 3.00
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 55:
+                    c_lg = 'B-'
+                    c_gp = 2.75
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 50:
+                    c_lg = 'C+'
+                    c_gp = 2.50
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 45:
+                    c_lg = 'C'
+                    c_gp = 2.25
+                    c_ps = credit * c_gp
+
+                elif total_marks >= 40:
+                    c_lg = 'D'
+                    c_gp = 2.00
+                    c_ps = credit * c_gp
+
+                else:
+                    c_lg = 'F'
+                    c_gp = 0.00
+                    c_ps = credit * c_gp
+                course_details[f'{c.course_code}'] = {'total_mark': total_marks, 'c_lg': c_lg, 'c_gp': c_gp, 'c_ps': c_ps}
             else:
-                student_details[f'{c.course_code}'] = '#'
-        print(student.student_id)
+                course_details[f'{c.course_code}'] = {'total_mark': '#', 'c_lg': '#', 'c_gp': '#', 'c_ps': '#'}
+           
         gpa = tps/credit_earn
         if gpa >= 4.00:
             result = 'A+'
@@ -2808,13 +2867,15 @@ def semester_final_result(request, semester_no):
             result = 'D'
         else:
             result = 'F'
-        res = "{:.2f}".format(gpa)
-        student_details['total_credit'] = total_credit
-        student_details['credit_earn'] = credit_earn
-        student_details['tps'] = tps
-        student_details['gpa'] = res
-        student_details['result'] = result
-        student_info[stu] =  student_details
+        gpa = "{:.2f}".format(gpa)
+        # final_result = {'total_credit': total_credit, 'credit_earn': credit_earn, 'tps': tps, 'gpa': gpa, 'result': result}
+        course_details['total_credit'] = total_credit
+        course_details['credit_earn'] = credit_earn
+        course_details['tps'] = tps
+        course_details['gpa'] = gpa
+        course_details['result'] = result
+        student_info[stu] =  course_details
+       
     context = {
         'semester_no': semester_no,
         'courses': courses,
