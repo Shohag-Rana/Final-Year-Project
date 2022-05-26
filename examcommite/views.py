@@ -1,7 +1,5 @@
-from email import message
-from sys import flags
+
 from django.shortcuts import render, HttpResponseRedirect
-from numpy import full
 from authentication.models import ExamCommitte, Student
 from chairman.models import Registration_By_Semester, Running_Semester, Course, Teacher_Student_Info
 from django.contrib.auth import logout
