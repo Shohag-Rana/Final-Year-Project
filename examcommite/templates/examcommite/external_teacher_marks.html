@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 {% load crispy_forms_filters %}  
    
-{% block title %} roll sheet {% endblock title %} 
+{% block title %} {{block.super}} external teacher marks {% endblock title %} 
 {% block mystyle %}
   .mark-sheet{
     border: 2px solid black;
@@ -83,33 +83,51 @@ input[type="number"]{
           </thead>
           <tbody>
             
-              {% for student in regular_students %}
+              {% for student , mark in regularStudents.items %}
               <tr>
                 <td>{{student.student_id}}</td>
-                <td>
-                    <input type="number" min="0" max="70" class="form-control text-center" name="totalMark_{{student.student_id}}">
-                </td>
+                {% if mark.marks %}
+                  <td>
+                    <input type="number" min="0" max="70" value="{{mark.marks}}" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                  </td>
+                {% else %}
+                  <td>
+                      <input type="number" min="0" max="70" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                  </td>
+                {% endif %}
               </tr>
               {% endfor %}
 
-              {% for student in backLog_students %}
+              {% for student, mark in backLogStudents.items %}
               <tr>
                 {% if student.remarks == 'BackLog' %}
                 <td>{{student.student_id}}(BL)</td>
                 {% else %}
                 <td>{{student.student_id}}</td>
                 {% endif %}
-                <td>
-                    <input type="number" min="0" max="70" class="form-control text-center" name="totalMark_{{student.student_id}}">
-                </td>
+                {% if mark.marks %}
+                  <td>
+                    <input type="number" min="0" max="70" value="{{mark.marks}}" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                  </td>
+                {% else %}
+                  <td>
+                      <input type="number" min="0" max="70" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                  </td>
+                {% endif %}
               {% endfor %}
 
-              {% for student in special_students %}
+              {% for student, mark in specialStudents.items %}
               <tr>
                   <td>{{student.student_id}}</td>
+                  {% if mark.marks %}
                   <td>
-                    <input type="number" min="0" max="70" class="form-control text-center" name="totalMark_{{student.student_id}}">
-                </td>
+                    <input type="number" min="0" max="70" value="{{mark.marks}}" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                  </td>
+                {% else %}
+                  <td>
+                      <input type="number" min="0" max="70" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                  </td>
+                {% endif %}
               </tr>
               {% endfor %}
           </tbody>

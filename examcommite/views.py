@@ -1,4 +1,4 @@
-
+import math
 from django.shortcuts import render, HttpResponseRedirect
 from authentication.models import ExamCommitte, Student
 from chairman.models import Registration_By_Semester, Running_Semester, Course, Teacher_Student_Info
@@ -107,9 +107,39 @@ def external_teacher_marks(request, course_code):
     regular_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks= 'Regular').order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks= 'BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code = course_code, remarks= 'Special').order_by('student_id')
-    checker = External_teacher_marks.objects.filter(course_code=course_code)
-    for c in checker:
-        return HttpResponseRedirect(f'/examcommitte/edit_external_teacher_marks/{course_code}/')
+    count = 0
+    backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
+    for stu in regular_students:
+        student_details = {}
+        external_teacher_marks = External_teacher_marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        marks = 0
+        for c in external_teacher_marks:
+            marks = c.marks
+        student_details['marks'] = marks
+        regularStudents[stu] = student_details
+        count += 1
+    for stu in backLog_students:
+        count += 1
+        student_details = {}
+        external_teacher_marks = External_teacher_marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        marks = 0
+        for c in external_teacher_marks:
+            marks = c.marks
+        student_details['marks'] = marks
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
+    for stu in special_students:
+        count += 1
+        student_details = {}
+        external_teacher_marks = External_teacher_marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        marks = 0
+        for c in external_teacher_marks:
+            marks = c.marks
+        student_details['marks'] = marks
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     if request.method == 'POST':
         for r in regular_students:
             data = request.POST.get(f'totalMark_{r.student_id}')
@@ -216,9 +246,9 @@ def external_teacher_marks(request, course_code):
         'c_code': course_code,
         'c_name': course.course_name,
         'credit': course.credit,
-        'regular_students': regular_students,
-        'backLog_students': backLog_students,
-        'special_students': special_students,
+        'regularStudents': regularStudents,
+        'backLogStudents': backLogStudents,
+        'specialStudents': specialStudents,
     }
     return render(request, 'examcommite/external_teacher_marks.html', context)
 
@@ -357,9 +387,6 @@ def edit_external_teacher_marks(request, course_code):
 
 def compare_internal_external_marks(request, course_code):
     course = Course.objects.get(course_code= course_code)
-    checker = Third_Examinner_Marks.objects.filter(course_code= course_code)
-    for check in checker:
-        return HttpResponseRedirect(f'/examcommitte/edit_third_examinner_mark/{course_code}/')
     students = Teacher_Student_Info.objects.filter(course_code = course_code).order_by('student_id')
     third_examine_students = {}
     all_teacher_marks = {}
@@ -367,6 +394,10 @@ def compare_internal_external_marks(request, course_code):
     for s in students:
         course_teacher_mark = Theory_Marks.objects.get(student_id= s.student_id, course_code= course_code)
         external_teacher_mark = External_teacher_marks.objects.get(student_id= s.student_id, course_code= course_code)
+        tem_checker = Third_Examinner_Marks.objects.filter(student_id= s.student_id, course_code= course_code)
+        temark = 0
+        for c in tem_checker:
+            temark = c.marks
         dif = abs((course_teacher_mark.total_marks) - (external_teacher_mark.marks))
         average_marks = ((course_teacher_mark.total_marks) + (external_teacher_mark.marks))/2
         third_examiner_mark = False
@@ -376,7 +407,7 @@ def compare_internal_external_marks(request, course_code):
             third_examine_students[s] = dif
         
         all_teacher_marks[s] = {'course_teacher_mark':course_teacher_mark.total_marks, 'average_marks': average_marks,
-        'external_teacher_mark': external_teacher_mark.marks, 'third_examiner_mark': third_examiner_mark}
+        'external_teacher_mark': external_teacher_mark.marks, 'third_examiner_mark': third_examiner_mark, 'temark': temark}
     
     if request.method == 'POST':
         for key, value in third_examine_students.items():
@@ -706,6 +737,7 @@ def mark_sheet_details(request, course_code):
             ct_marks = mark.ct_marks
             attendence_mark = mark.attendence_marks
         total_marks = ct_marks + attendence_mark + average_mark
+        total_marks = math.ceil(total_marks)
         if total_marks >= 80:
             LG = 'A+'
             GP = 4.00
@@ -826,6 +858,7 @@ def mark_sheet_details(request, course_code):
             ct_marks = mark.ct_marks
             attendence_mark = mark.attendence_marks
         total_marks = ct_marks + attendence_mark + average_mark
+        total_marks = math.ceil(total_marks)
         if total_marks >= 80:
             LG = 'A+'
             GP = 4.00
@@ -946,6 +979,7 @@ def mark_sheet_details(request, course_code):
             ct_marks = mark.ct_marks
             attendence_mark = mark.attendence_marks
         total_marks = ct_marks + attendence_mark + average_mark
+        total_marks = math.ceil(total_marks)
         if total_marks >= 80:
             LG = 'A+'
             GP = 4.00
@@ -1872,6 +1906,7 @@ def final_consoilated_research_project_marksheet(request, course_code):
                     average_mark = total2/2    
         
         total_marks = average_mark
+        total_marks = math.ceil(total_marks)
         if total_marks >= 80:
             LG = 'A+'
             GP = 4.00
@@ -1982,6 +2017,7 @@ def final_consoilated_research_project_marksheet(request, course_code):
                     average_mark = total2/2    
         
         total_marks = average_mark
+        total_marks = math.ceil(total_marks)
         if total_marks >= 80:
             LG = 'A+'
             GP = 4.00
@@ -2092,6 +2128,7 @@ def final_consoilated_research_project_marksheet(request, course_code):
                     average_mark = total2/2    
         
         total_marks = average_mark
+        total_marks = math.ceil(total_marks)
         if total_marks >= 80:
             LG = 'A+'
             GP = 4.00
@@ -2748,7 +2785,7 @@ def exam_committe_viva_course_details(request, course_code):
 
 def semester_final_result(request, semester_no):
     courses = Course.objects.filter(semister_no = semester_no)
-    students = Registration_By_Semester.objects.all()
+    students = Registration_By_Semester.objects.filter(semester_name = semester_no)
     student_info ={}
     for student in students:
         course_details = {}
@@ -2757,94 +2794,124 @@ def semester_final_result(request, semester_no):
         tps = 0
         stu = Student.objects.get(student_id= student.student_id)
         stu_courses = Teacher_Student_Info.objects.filter(student_id= student.student_id, semester= semester_no)
-        for c in stu_courses:
+        for c in courses:
             course = Course.objects.get(course_code= c.course_code)
-            total_credit += course.credit
+            
+            ps = 0
+            total_marks = 0
             if course.course_type == 'Theory':
-                ps = Final_MarkSheet_Theory_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
-                
+                point_secures = Final_MarkSheet_Theory_Course.objects.filter(student_id= student.student_id, course_code = course.course_code)
+                for c in point_secures:
+                    ps = c.PS
+                    total_marks = c.total_marks
             if course.course_type == 'Lab':
-                ps = Final_MarkSheet_Lab_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
-                
+                point_secures = Final_MarkSheet_Lab_Course.objects.filter(student_id= student.student_id, course_code = course.course_code)
+                for c in point_secures:
+                    ps = c.PS
+                    total_marks = c.total_marks
+
             if course.course_type == 'Viva':
-                ps = Final_MarkSheet_Viva_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
-                
+                point_secures = Final_MarkSheet_Viva_Course.objects.filter(student_id= student.student_id, course_code = course.course_code)
+                for c in point_secures:
+                    ps = c.PS
+                    total_marks = c.total_marks
+
             if course.course_type == 'Project':
-                ps = Final_MarkSheet_Project_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
-               
+                point_secures = Final_MarkSheet_Project_Course.objects.filter(student_id= student.student_id, course_code = course.course_code)
+                for c in point_secures:
+                    ps = c.PS
+                    total_marks = c.total_marks
+
             if course.course_type == 'Research_Project':
-                ps = Final_MarkSheet_Project_Course.objects.get(student_id= student.student_id, course_code = course.course_code)
-                
+                point_secures = Final_MarkSheet_Project_Course.objects.filter(student_id= student.student_id, course_code = course.course_code)
+                for c in point_secures:
+                    ps = c.PS
+                    total_marks = c.total_marks
+
             flag = False
             credit = 0
-
-            for main_course in courses:
+            
+            for main_course in stu_courses:
                 if main_course.course_code == c.course_code:
                     flag = True
                     credit = main_course.credit
+                    total_credit += credit
                     break
                 
             if flag == True:
-                tps += ps.PS
-                if ps.PS == 0:
+                tps += ps
+                if ps == 0:
                     credit_earn += 0
                 else:
                     credit_earn += main_course.credit
-                total_marks = ps.total_marks
+                total_marks = math.ceil(total_marks)
                 if total_marks >= 80:
                     c_lg = 'A+'
                     c_gp = 4.00
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 75:
                     c_lg = 'A'
                     c_gp = 3.75
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 70:
                     c_lg = 'A-'
                     c_gp = 3.50
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 65:
                     c_lg = 'B+'
                     c_gp = 3.25
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 60:
                     c_lg = 'B'
                     c_gp = 3.00
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 55:
                     c_lg = 'B-'
                     c_gp = 2.75
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 50:
                     c_lg = 'C+'
                     c_gp = 2.50
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 45:
                     c_lg = 'C'
                     c_gp = 2.25
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 elif total_marks >= 40:
                     c_lg = 'D'
                     c_gp = 2.00
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
 
                 else:
                     c_lg = 'F'
                     c_gp = 0.00
                     c_ps = credit * c_gp
+                    c_ps = "{:.2f}".format(c_ps)
                 course_details[f'{c.course_code}'] = {'total_mark': total_marks, 'c_lg': c_lg, 'c_gp': c_gp, 'c_ps': c_ps}
             else:
-                course_details[f'{c.course_code}'] = {'total_mark': '#', 'c_lg': '#', 'c_gp': '#', 'c_ps': '#'}
-           
-        gpa = tps/credit_earn
+                course_details[f'{c.course_code}'] = {'total_mark': '', 'c_lg': '', 'c_gp': '', 'c_ps': ''}
+
+        if credit_earn == 0:
+            gpa = 0
+        else:
+            gpa = tps/credit_earn
         if gpa >= 4.00:
             result = 'A+'
         elif gpa >= 3.75:

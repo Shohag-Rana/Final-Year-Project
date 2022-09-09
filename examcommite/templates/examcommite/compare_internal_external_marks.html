@@ -3,7 +3,7 @@
 {% load crispy_forms_tags %}
 {% load crispy_forms_filters %}  
    
-{% block title %} roll sheet {% endblock title %} 
+{% block title %} {{block.super}} Compare Internal and External Course Teacher Mark {% endblock title %} 
 {% block mystyle %}
 td{
   border: 1px solid black;
@@ -89,11 +89,19 @@ input[type='number']{
           <td>{{mark.course_teacher_mark}}</td>
           <td>{{mark.external_teacher_mark}}</td>
           {% if mark.third_examiner_mark == True %}
-            <td style="width: 250px">
-              <div class="form-group">
-                <input type="number" class="form-control text-center" name="totalMark_{{student.student_id}}">
-              </div>
-            </td>
+            {% if mark.temark %}
+              <td style="width: 250px">
+                <div class="form-group">
+                  <input type="number" value="{{mark.temark}}" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                </div>
+              </td>
+            {% else %}
+              <td style="width: 250px">
+                <div class="form-group">
+                  <input type="number" class="form-control text-center" name="totalMark_{{student.student_id}}">
+                </div>
+              </td>
+            {% endif %}
           {% else %}
             <td></td>
           {% endif %}

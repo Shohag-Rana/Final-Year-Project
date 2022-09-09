@@ -12,7 +12,7 @@
 }
 td{
     border: 1px solid black;
-    font-size: 11px;
+    font-size: 10px;
 }
 tr{
     border-bottom: 1px solid black;
@@ -29,18 +29,21 @@ th{
     margin-left: 150px
 }
 .navbar{
-    width: 2550px;
+    width: 2340px;
+    display: none;
 }
 .footer{
-    width: 2550px;
+    width: 2340px;
+    display: none !important;
 }
 .owner{
-    width: 2550px;
+    width: 2340px;
+    display: none;
 }
 
 {% endblock mystyle %}
    
-{% block title %} Lab Marks {% endblock title %} 
+{% block title %} {{block.super}} semester final result {% endblock title %} 
 {% block content1 %}
 <div class="container">
     <div class="row">
@@ -60,7 +63,8 @@ th{
 {% endblock content1 %}
 {% block content2 %}
     {% comment %} <div class="container"> {% endcomment %}
-        <div class="row" style="width: 2500px">
+
+        <div class="row" style="width: 2220px">
             <div class="col-3 mt-2 p-3" style="margin-left: 70px">
                 <p><b>Letter Grades and corresponding Grade Points Shall be determined as follows:</b></p>
                 <table class="table table-hover table-striped text-center table-bordered">
@@ -212,7 +216,7 @@ th{
                     <th scope="col">SL No</th>
                     <th scope="col">Hall</th>
                     <th scope="col">Student ID</th>
-                    <th scope="col" style="width: 200px">Name of the Candidates</th>
+                    <th scope="col" style="width: 300px !important">Name of the Candidates</th>
                     {% for course in courses %}
                     <th scope="col" colspan="4">Course Code: <br> <span><u>{{course.course_code}}</u></span> <br> Credit: <span><u>{{course.credit}}</u></span> </th>
                     {% endfor %}
@@ -238,7 +242,7 @@ th{
                     <tr>
                         <td colspan="4"></td>
                         {% for course in courses %}
-                            <td>MO(%)</td>
+                            <td>MO <br> (%)</td>
                             <td>LG</td>
                             <td>GP</td>
                             <td>PS</td>
@@ -293,53 +297,56 @@ th{
                 </tbody>
               </table>
         </div>
-            <div class="row p-1" style="width: 2550px; margin-top: 50px">
-                <div class="col-3">
-                    <div class="row">
-                        <div class="col-6">
-                            <h6 class="mb-3">Signature of Tabulators</h6>
-                            <p><b>1.</b>...............................................................</p>
-                            <p><b>2.</b>...............................................................</p>
-                            <p><b>3.</b>...............................................................</p>
-                        </div>
-                        <div class="col-6">
-                            <h6 class="mb-3">Full Name:</h6>
-                            <p><b>1.</b>...............................................................</p>
-                            <p><b>2.</b>...............................................................</p>
-                            <p><b>3.</b>...............................................................</p>
-                        </div>
+        <div class="row p-1" style="margin-top: 50px; width: 2220px">
+            <div class="col-3">
+                <div class="row">
+                    <div class="col-6">
+                        <h6 class="mb-3">Signature of Tabulators</h6>
+                        <p><b>1.</b>...............................................................</p>
+                        <p><b>2.</b>...............................................................</p>
+                        <p><b>3.</b>...............................................................</p>
                     </div>
-                </div>
-                <div class="col-2">
-                    <h6 style="margin-bottom: 70px">Results Published on: ............................................</h6>
-                    <h6>Controller of Examinations</h6>
-                    <h6>Date: ............................................................</h6>
-                </div>
-                <div class="col-6">
-                    <p class="text-center"><b>Certified that the results have been finalised by the Examination Committee as per Ordinance, Rules and Regulations.</b></p>
-                    <div class="row">
-                        <div class="col-6">
-                            <h6 style="text-indent: 80px;">1. ............................................................. Chairman of Examination Committee</h6>
-                            <h6 style="text-indent: 80px;">2. ............................................................... Member of  Examination Committee</h6>
-                            <h6>Signature: 3. ............................................................... Member of  Examination Committee</h6>
-                            <h6 style="text-indent: 80px;">4. ............................................................... Member of  Examination Committee</h6>
-                            <h6 style="text-indent: 80px;">5. ............................................................... Member of  Examination Committee</h6>
-                        </div>
-                        <div class="col-6">
-                            <h6 style="text-indent: 80px;">1. ............................................................. Chairman of Examination Committee</h6>
-                            <h6 style="text-indent: 80px;">2. ............................................................... Member of  Examination Committee</h6>
-                            <h6>Full Name: 3. .............................................................. Member of  Examination Committee</h6>
-                            <h6 style="text-indent: 80px;">4. ............................................................... Member of  Examination Committee</h6>
-                            <h6 style="text-indent: 80px;">5. ............................................................... Member of  Examination Committee</h6>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-1 text-center">
-                    <div>
-                        <h6 style="margin-top: 130px;">Vice-Chancellor</h6>
+                    <div class="col-6">
+                        <h6 class="mb-3">Full Name:</h6>
+                        <p><b>1.</b>...............................................................</p>
+                        <p><b>2.</b>...............................................................</p>
+                        <p><b>3.</b>...............................................................</p>
                     </div>
                 </div>
             </div>
+            <div class="col-2">
+                <h6 style="margin-bottom: 70px">Results Published on: ............................................</h6>
+                <h6>Controller of Examinations</h6>
+                <h6>Date: ............................................................</h6>
+            </div>
+            <div class="col-6">
+                <p class="text-center"><b>Certified that the results have been finalised by the Examination Committee as per Ordinance, Rules and Regulations.</b></p>
+                <div class="row">
+                    <div class="col-6">
+                        <h6 style="text-indent: 80px;">1. ........................................ Chairman of Examination Committee</h6>
+                        <h6 style="text-indent: 80px;">2. ....................................... Member of  Examination Committee</h6>
+                        <h6>Signature: 3. .......................................... Member of  Examination Committee</h6>
+                        <h6 style="text-indent: 80px;">4. ....................................... Member of  Examination Committee</h6>
+                        <h6 style="text-indent: 80px;">5. ....................................... Member of  Examination Committee</h6>
+                    </div>
+                    <div class="col-6">
+                        <h6 style="text-indent: 80px;">1. ........................................Chairman of Examination Committee</h6>
+                        <h6 style="text-indent: 80px;">2. ....................................... Member of  Examination Committee</h6>
+                        <h6>Full Name: 3. ........................................ Member of  Examination Committee</h6>
+                        <h6 style="text-indent: 80px;">4. .......................................... Member of  Examination Committee</h6>
+                        <h6 style="text-indent: 80px;">5. .......................................... Member of  Examination Committee</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-1 text-center">
+                <div>
+                    <h6 style="margin-top: 130px;">Vice-Chancellor</h6>
+                </div>
+            </div>
+        </div>
+        {% comment %} <div class="row">
+            <button onclick="window.print()" style="width:50px;" class="btn btn-danger">Print</button>
+        </div> {% endcomment %}
 {% endblock content2 %}
 
 

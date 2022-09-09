@@ -33,44 +33,10 @@
               <a class="dropdown-item" href="/faculty/profile/">Profile</a>
             </div>
           </li>
-          <li class="nav-item  dropdown">
-            <a
-              class="nav-link dropdown-toggle active"
-              href="#"
-              id="navbarDropdown"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-             Courses
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href={% url 'current_course' %}>Current Courses</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Complete Courses</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Backlog Courses</a>
-               
-            </div>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'current_course' %}">Courses</a>
           </li>
-          <li class="nav-item  dropdown">
-            <a
-              class="nav-link dropdown-toggle active"
-              href="#"
-              id="navbarDropdown"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-             Semester
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Current Semester</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Complete Semester</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Incomplete Semester</a>
-               
-            </div>
-          </li>
+          
           <li class="nav-item">
             <a class="nav-link active" href="#">Result</a>
           </li>

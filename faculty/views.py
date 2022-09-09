@@ -1,3 +1,4 @@
+import math
 from django.shortcuts import render, HttpResponseRedirect
 from django.contrib.auth.forms import PasswordChangeForm, SetPasswordForm
 from django.contrib import messages
@@ -409,16 +410,111 @@ def Theory_mark_sheet(request, course_code):
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="Regular").order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="BackLog").order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks="Special").order_by('student_id')
-    checker = Theory_Marks.objects.filter(course_code= course_code)
-    for c in checker:
-        return HttpResponseRedirect(f'/faculty/update_theory_marks/{course_code}/')
     count = 0
     backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
     for stu in regular_students:
+        student_details = {}
+        theory_marks = Theory_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        q1=0
+        q2=0
+        q3=0
+        q4=0
+        q5=0
+        q6=0
+        q7=0
+        q8=0
+        q9=0
+        for c in theory_marks:
+            q1 = c.q1 
+            q2 = c.q2 
+            q3 = c.q3 
+            q4 = c.q4 
+            q5 = c.q5 
+            q6 = c.q6 
+            q7 = c.q7 
+            q8 = c.q8 
+            q9 = c.q9 
+        student_details['q1'] = q1
+        student_details['q2'] = q2
+        student_details['q3'] = q3
+        student_details['q4'] = q4
+        student_details['q5'] = q5
+        student_details['q6'] = q6
+        student_details['q7'] = q7
+        student_details['q8'] = q8
+        student_details['q9'] = q9
+        regularStudents[stu] = student_details
         count += 1
     for stu in backLog_students:
+        student_details = {}
+        theory_marks = Theory_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        q1=0
+        q2=0
+        q3=0
+        q4=0
+        q5=0
+        q6=0
+        q7=0
+        q8=0
+        q9=0
+        for c in theory_marks:
+            q1 = c.q1 
+            q2 = c.q2 
+            q3 = c.q3 
+            q4 = c.q4 
+            q5 = c.q5 
+            q6 = c.q6 
+            q7 = c.q7 
+            q8 = c.q8 
+            q9 = c.q9 
+        student_details['q1'] = q1
+        student_details['q2'] = q2
+        student_details['q3'] = q3
+        student_details['q4'] = q4
+        student_details['q5'] = q5
+        student_details['q6'] = q6
+        student_details['q7'] = q7
+        student_details['q8'] = q8
+        student_details['q9'] = q9
         count += 1
-        backLogStudents[stu] = count
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
+    for stu in special_students:
+        student_details = {}
+        theory_marks = Theory_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        q1=0
+        q2=0
+        q3=0
+        q4=0
+        q5=0
+        q6=0
+        q7=0
+        q8=0
+        q9=0
+        for c in theory_marks:
+            q1 = c.q1 
+            q2 = c.q2 
+            q3 = c.q3 
+            q4 = c.q4 
+            q5 = c.q5 
+            q6 = c.q6 
+            q7 = c.q7 
+            q8 = c.q8 
+            q9 = c.q9 
+        student_details['q1'] = q1
+        student_details['q2'] = q2
+        student_details['q3'] = q3
+        student_details['q4'] = q4
+        student_details['q5'] = q5
+        student_details['q6'] = q6
+        student_details['q7'] = q7
+        student_details['q8'] = q8
+        student_details['q9'] = q9
+        count += 1
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     if request.method == 'POST':
         for student in regular_students:
             total_marks = 0
@@ -771,9 +867,9 @@ def Theory_mark_sheet(request, course_code):
         'c_code': course_code,
         'credit': course.credit,
         'c_name': course.course_name,
-        'regular_students': regular_students,
+        'regularStudents': regularStudents,
         'backLogStudents': backLogStudents,
-        'special_students': special_students,
+        'specialStudents': specialStudents,
         }
     return render(request, 'faculty/detailed_mark_sheet.html', context)
 
@@ -1355,32 +1451,62 @@ def lab_marks(request, course_code):
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
-    checker = Lab_Marks.objects.filter(course_code= course_code)
-    for c in checker:
-        return HttpResponseRedirect(f'/faculty/edit_lab_marks/{course_code}/')
+   
     count = 0
-    regular_student = {}
-    backlog_student = {}
-    special_student = {}
+    backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
     submit_button = False
     for stu in regular_students:
-        student = Student.objects.get(student_id= stu.student_id)
-        count += 1
-        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        lab_marks = Lab_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        lab_attendence = 0
+        lab_report = 0
+        lab_quize = 0
+        for c in lab_marks:
+            lab_attendence = c.lab_attendence
+            lab_report = c.lab_report
+            lab_quize = c.lab_quize
+        student_details['lab_attendence'] = lab_attendence
+        student_details['lab_report'] = lab_report
+        student_details['lab_quize'] = lab_quize
+        regularStudents[stu] = student_details
+        count += 1
     for stu in backLog_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        lab_marks = Lab_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        lab_attendence = 0
+        lab_report = 0
+        lab_quize = 0
+        for c in lab_marks:
+            lab_attendence = c.lab_attendence
+            lab_report = c.lab_report
+            lab_quize = c.lab_quize
+        student_details['lab_attendence'] = lab_attendence
+        student_details['lab_report'] = lab_report
+        student_details['lab_quize'] = lab_quize
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
     for stu in special_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        lab_marks = Lab_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        lab_attendence = 0
+        lab_report = 0
+        lab_quize = 0
+        for c in lab_marks:
+            lab_attendence = c.lab_attendence
+            lab_report = c.lab_report
+            lab_quize = c.lab_quize
+        student_details['lab_attendence'] = lab_attendence
+        student_details['lab_report'] = lab_report
+        student_details['lab_quize'] = lab_quize
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     if request.method == 'POST':
         for stu in regular_students:
 
@@ -1403,6 +1529,7 @@ def lab_marks(request, course_code):
             else:
                 lab_quize_mark = 0
             lab_total_mark = lab_attendence_mark + lab_report_mark + lab_quize_mark
+            print(lab_attendence_mark, lab_report_mark, lab_quize_mark, lab_total_mark)
             student = Student.objects.get(student_id= stu.student_id)
             data = Lab_Marks(
                 student_id = student.student_id,
@@ -1572,10 +1699,10 @@ def lab_marks(request, course_code):
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'regular_student': regular_student,
-        'backlog_student': backlog_student,
+        'regularStudents': regularStudents,
+        'backLogStudents': backLogStudents,
         'submit_button': submit_button,
-        'special_student': special_student,
+        'specialStudents': specialStudents,
     }
     return render(request, 'faculty/lab_marks.html', context)
 
@@ -1584,32 +1711,52 @@ def final_50_marks(request, course_code):
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
-    checker = Lab_Final_50_Marks.objects.filter(course_code= course_code)
-    for c in checker:
-        return HttpResponseRedirect(f'/faculty/edit_lab_final_50_marks/{course_code}/')
     count = 0
-    regular_student = {}
-    backlog_student = {}
-    special_student = {}
+    backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
     submit_button = False
     for stu in regular_students:
-        student = Student.objects.get(student_id= stu.student_id)
-        count += 1
-        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        lab_final_50_marks = Lab_Final_50_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        final_practical_exam = 0
+        viva_voce = 0
+        for c in lab_final_50_marks:
+            final_practical_exam = c.final_practical_exam
+            viva_voce = c.viva_voce
+        student_details['final_practical_exam'] = final_practical_exam
+        student_details['viva_voce'] = viva_voce
+        regularStudents[stu] = student_details
+        count += 1
     for stu in backLog_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        lab_final_50_marks = Lab_Final_50_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        final_practical_exam = 0
+        viva_voce = 0
+        for c in lab_final_50_marks:
+            final_practical_exam = c.final_practical_exam
+            viva_voce = c.viva_voce
+        student_details['final_practical_exam'] = final_practical_exam
+        student_details['viva_voce'] = viva_voce
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
     for stu in special_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        lab_final_50_marks = Lab_Final_50_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        final_practical_exam = 0
+        viva_voce = 0
+        for c in lab_final_50_marks:
+            final_practical_exam = c.final_practical_exam
+            viva_voce = c.viva_voce
+        student_details['final_practical_exam'] = final_practical_exam
+        student_details['viva_voce'] = viva_voce
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     if request.method == 'POST':
         for stu in regular_students:
             final_practical_exam = request.POST.get(f'final_practical_exam_{stu.student_id}')
@@ -1768,10 +1915,10 @@ def final_50_marks(request, course_code):
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'regular_student': regular_student,
-        'backlog_student': backlog_student,
+        'regularStudents': regularStudents,
+        'backLogStudents': backLogStudents,
         'submit_button': submit_button,
-        'special_student': special_student,
+        'specialStudents': specialStudents,
     }
     return render(request, 'faculty/final_50_marks.html', context)
 
@@ -2584,32 +2731,52 @@ def project_marks(request, course_code):
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
-    checker = Project_Marks.objects.filter(course_code= course_code)
-    for c in checker:
-        return HttpResponseRedirect(f'/faculty/edit_project_marks/{course_code}/')
-    regular_student = {}
-    backlog_student = {}
-    special_student = {}
-    submit_button = False
     count = 0
+    backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
+    submit_button = False
     for stu in regular_students:
-        student = Student.objects.get(student_id= stu.student_id)
-        count += 1
-        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Project_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        supervisor_marks = 0
+        defence_marks = 0
+        for c in project_marks:
+            supervisor_marks = c.supervisor_marks
+            defence_marks = c.defence_marks
+        student_details['supervisor_marks'] = supervisor_marks
+        student_details['defence_marks'] = defence_marks
+        regularStudents[stu] = student_details
+        count += 1
     for stu in backLog_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Project_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        supervisor_marks = 0
+        defence_marks = 0
+        for c in project_marks:
+            supervisor_marks = c.supervisor_marks
+            defence_marks = c.defence_marks
+        student_details['supervisor_marks'] = supervisor_marks
+        student_details['defence_marks'] = defence_marks
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
     for stu in special_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Project_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        supervisor_marks = 0
+        defence_marks = 0
+        for c in project_marks:
+            supervisor_marks = c.supervisor_marks
+            defence_marks = c.defence_marks
+        student_details['supervisor_marks'] = supervisor_marks
+        student_details['defence_marks'] = defence_marks
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     if request.method == 'POST':
         for stu in regular_students:
             supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
@@ -2771,10 +2938,10 @@ def project_marks(request, course_code):
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'regular_student': regular_student,
-        'backlog_student': backlog_student,
+        'regularStudents': regularStudents,
+        'backLogStudents': backLogStudents,
         'submit_button': submit_button,
-        'special_student': special_student,
+        'specialStudents': specialStudents,
     }
     return render(request, 'faculty/project_marks.html', context)
 
@@ -2783,32 +2950,44 @@ def viva_course_marks(request, course_code):
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
-    checker = Viva_Marks.objects.filter(course_code= course_code)
-    for c in checker:
-        return HttpResponseRedirect(f'/faculty/edit_viva_marks/{course_code}/')
-    regular_student = {}
-    backlog_student = {}
-    special_student = {}
-    submit_button = False
+
     count = 0
+    backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
+    submit_button = False
     for stu in regular_students:
-        student = Student.objects.get(student_id= stu.student_id)
-        count += 1
-        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Viva_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        total_mark = 0
+        for c in project_marks:
+            total_mark = c.total_mark
+        student_details['total_mark'] = total_mark
+        regularStudents[stu] = student_details
+        count += 1
     for stu in backLog_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Viva_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        total_mark = 0
+        for c in project_marks:
+            total_mark = c.total_mark
+        student_details['total_mark'] = total_mark
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
     for stu in special_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Viva_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        total_mark = 0
+        for c in project_marks:
+            total_mark = c.total_mark
+        student_details['total_mark'] = total_mark
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     if request.method == 'POST':
         for stu in regular_students:
             viva_marks = request.POST.get(f'viva_marks_{stu.student_id}')
@@ -2943,10 +3122,10 @@ def viva_course_marks(request, course_code):
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'regular_student': regular_student,
-        'backlog_student': backlog_student,
+        'regularStudents': regularStudents,
+        'backLogStudents': backLogStudents,
         'submit_button': submit_button,
-        'special_student': special_student,
+        'specialStudents': specialStudents,
     }
     return render(request, 'faculty/viva_course_marks.html', context)
 
@@ -2955,32 +3134,53 @@ def research_project_marks(request, course_code):
     regular_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Regular').order_by('student_id')
     backLog_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='BackLog').order_by('student_id')
     special_students = Teacher_Student_Info.objects.filter(course_code= course_code, remarks='Special').order_by('student_id')
-    checker = Research_Project_Marks.objects.filter(course_code= course_code)
-    for c in checker:
-        return HttpResponseRedirect(f'/faculty/edit_research_project_marks/{course_code}/')
-    regular_student = {}
-    backlog_student = {}
-    special_student = {}
-    submit_button = False
+   
     count = 0
+    backLogStudents = {}
+    regularStudents = {}
+    specialStudents = {}
+    submit_button = False
     for stu in regular_students:
-        student = Student.objects.get(student_id= stu.student_id)
-        count += 1
-        regular_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Research_Project_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        supervisor_marks = 0
+        defence_marks = 0
+        for c in project_marks:
+            supervisor_marks = c.supervisor_marks
+            defence_marks = c.defence_marks
+        student_details['supervisor_marks'] = supervisor_marks
+        student_details['defence_marks'] = defence_marks
+        regularStudents[stu] = student_details
+        count += 1
     for stu in backLog_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        backlog_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Research_Project_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        supervisor_marks = 0
+        defence_marks = 0
+        for c in project_marks:
+            supervisor_marks = c.supervisor_marks
+            defence_marks = c.defence_marks
+        student_details['supervisor_marks'] = supervisor_marks
+        student_details['defence_marks'] = defence_marks
+        student_details['count'] = count
+        backLogStudents[stu] = student_details
     for stu in special_students:
-        student = Student.objects.get(student_id= stu.student_id)
         count += 1
-        special_student[stu] = {'full_name': student.first_name + " " + student.last_name,
-        'count': count}
         submit_button = True
+        student_details = {}
+        project_marks = Research_Project_Marks.objects.filter(student_id= stu.student_id, course_code= course_code)
+        supervisor_marks = 0
+        defence_marks = 0
+        for c in project_marks:
+            supervisor_marks = c.supervisor_marks
+            defence_marks = c.defence_marks
+        student_details['supervisor_marks'] = supervisor_marks
+        student_details['defence_marks'] = defence_marks
+        student_details['count'] = count
+        specialStudents[stu] = student_details
     if request.method == 'POST':
         for stu in regular_students:
             supervisor_marks = request.POST.get(f'supervisor_marks_{stu.student_id}')
@@ -3142,10 +3342,10 @@ def research_project_marks(request, course_code):
         'c_teacher': course.course_teacher,
         'credit': course.credit,
         'c_name': course.course_name,
-        'regular_student': regular_student,
-        'backlog_student': backlog_student,
+        'regularStudents': regularStudents,
+        'backLogStudents': backLogStudents,
         'submit_button': submit_button,
-        'special_student': special_student,
+        'specialStudents': specialStudents,
     }
     return render(request, 'faculty/research_project_marks.html', context)
 

@@ -11,5 +11,6 @@ urlpatterns = [
    	path('complete_courses/', views.complete_courses, name= 'complete_courses'),
    	path('course_registration/', views.course_registration, name= 'course_registration'),
    	path('student_special_course_registration/', views.student_special_course_registration, name= 'student_special_course_registration'),
+   	path('application_form/', views.application_form, name= 'application_form'),
    	
 ]

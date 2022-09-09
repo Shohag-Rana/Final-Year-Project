@@ -93,44 +93,68 @@ input[type=number]{
                   </tr>
                 </thead>
                 <tbody>
-                    {% for student, mark in regular_student.items %}
+                    {% for student, mark in regularStudents.items %}
                         <tr class="text-center">
-                            <td>{{mark.count}}</td>
+                            <td>{{forloop.counter}}</td>
                             <td>{{student.student_id}}</td>
-                            <td>{{mark.full_name}}</td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
-                                </div>
-                            </td>
+                            <td>{{student.student_name}}</td>
+                            {% if mark.total_mark %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.total_mark}}" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
                              
                             <td>{{student.remarks}}</td>
                         </tr>
                     {% endfor %}
-                    {% for student, mark in backlog_student.items %}
+                    {% for student, mark in backLogStudents.items %}
                         <tr class="text-center">
                             <td>{{mark.count}}</td>
                             <td>{{student.student_id}}</td>
-                            <td>{{mark.full_name}}</td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
-                                </div>
-                            </td>
+                            <td>{{student.student_name}}</td>
+                            {% if mark.total_mark %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.total_mark}}" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
                              
                             <td>{{student.remarks}}</td>
                         </tr>
                     {% endfor %}
-                    {% for student, mark in special_student.items %}
+                    {% for student, mark in specialStudents.items %}
                         <tr class="text-center">
                             <td>{{mark.count}}</td>
                             <td>{{student.student_id}}</td>
-                            <td>{{mark.full_name}}</td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
-                                </div>
-                            </td>
+                            <td>{{student.student_name}}</td>
+                            {% if mark.total_mark %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.total_mark}}" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="viva_marks_{{student.student_id}}" min="0" max="100" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
                              
                             <td>{{student.remarks}}</td>
                         </tr>

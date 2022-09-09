@@ -72,7 +72,7 @@ input[type=number]{
                         <h5>Name of the Examiner(s)  :  {{c_teacher}} </h5>
                     </div>
                     <div class="col-4">
-                        <h5 class="credit-margin">Full Marks : 50</h5>
+                        <h5 class="credit-margin">Full Marks : 100</h5>
                     </div>
                 </div>
             </div>
@@ -94,59 +94,108 @@ input[type=number]{
                   </tr>
                 </thead>
                 <tbody>
-                    {% for student, mark in regular_student.items %}
+                    {% for student, mark in regularStudents.items %}
                         <tr class="text-center">
-                            <td>{{mark.count}}</td>
+                            <td>{{forloop.counter}}</td>
                             <td>{{student.student_id}}</td>
-                            <td>{{mark.full_name}}</td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
-                                </div>
-                            </td>
+                            <td>{{student.student_name}}</td>
+                            {% if mark.supervisor_marks %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.supervisor_marks}}" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
+
+                            {% if mark.defence_marks %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.defence_marks}}" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
                             <td>{{student.remarks}}</td>
                         </tr>
                     {% endfor %}
-                    {% for student, mark in backlog_student.items %}
+                    {% for student, mark in backLogStudents.items %}
                         <tr class="text-center">
                             <td>{{mark.count}}</td>
                             <td>{{student.student_id}}</td>
-                            <td>{{mark.full_name}}</td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
-                                </div>
-                            </td>
-                           
+                            <td>{{student.student_name}}</td>
+                            {% if mark.supervisor_marks %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.supervisor_marks}}" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
+
+                            {% if mark.defence_marks %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.defence_marks}}" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
                             <td class="text-danger">{{student.remarks}}</td>
                         </tr>
                     {% endfor %}
-                    {% for student, mark in special_student.items %}
+                    {% for student, mark in specialStudents.items %}
                         <tr class="text-center">
                             <td>{{mark.count}}</td>
                             <td>{{student.student_id}}</td>
-                            <td>{{mark.full_name}}</td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
-                                </div>
-                            </td>
-                            <td>
-                                <div class="form-group">
-                                    <input type="number" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
-                                </div>
-                            </td>
-                            
+                            <td>{{student.student_name}}</td>
+                            {% if mark.supervisor_marks %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.supervisor_marks}}" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="supervisor_marks_{{student.student_id}}" min="0" max="70" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
+
+                            {% if mark.defence_marks %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" value="{{mark.defence_marks}}" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% else %}
+                                <td>
+                                    <div class="form-group">
+                                        <input type="number" name="defence_marks_{{student.student_id}}" min="0" max="30" class="form-control text-center">
+                                    </div>
+                                </td>
+                            {% endif %}
                             <td class="text-danger">{{student.remarks}}</td>
                         </tr>
                     {% endfor %}

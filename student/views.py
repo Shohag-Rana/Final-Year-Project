@@ -444,3 +444,6 @@ def student_special_course_registration(request):
             data.save()
 
     return render(request, 'student/special_course_registration.html', context)
+
+def application_form(request):
+    return render(request, 'student/application_form.html')

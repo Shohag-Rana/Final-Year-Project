@@ -40,61 +40,14 @@
               <a class="dropdown-item" href={% url 'chairman_profile' %}>Profile</a>
             </div>
           </li>
-          <li class="nav-item  dropdown">
-            <a
-              class="nav-link dropdown-toggle active"
-              href="#"
-              id="navbarDropdown"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-             Courses
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href={% url 'add_courses' %}>Add Courses</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Special Courses</a>
-               
-            </div>
+          <li class="nav-item">
+            <a class="nav-link active" href={% url 'add_courses' %}>Add Courses</a>
           </li>
-          <li class="nav-item  dropdown">
-            <a
-              class="nav-link dropdown-toggle active"
-              href="#"
-              id="navbarDropdown"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-             Faculty
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href={% url 'teacher_list' %}>Teacher List</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Complete Semester</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Incomplete Semester</a>
-               
-            </div>
+          <li class="nav-item">
+            <a class="nav-link active" href={% url 'teacher_list' %}>Faculty</a>
           </li>
-          <li class="nav-item  dropdown">
-            <a
-              class="nav-link dropdown-toggle active"
-              href="#"
-              id="navbarDropdown"
-              role="button"
-              data-toggle="dropdown"
-              aria-haspopup="true"
-              aria-expanded="false"
-            >
-             Semesters
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="{% url 'add_semesters' %}">Add Semesters</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">View details</a><div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="#">Students of Semesters</a>
-               
-            </div>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'add_semesters' %}">Add_Semesters</a>
           </li>
           <li class="nav-item  dropdown">
             <a
