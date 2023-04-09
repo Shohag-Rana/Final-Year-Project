@@ -29,7 +29,6 @@ INSTALLED_APPS = [
     'authentication',
     'crispy_forms',
     'django.contrib.humanize',
-    'whitenoise.runserver_nostatic',
     'student',
     'faculty',
     'stuff',
@@ -39,9 +38,7 @@ INSTALLED_APPS = [
 ]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

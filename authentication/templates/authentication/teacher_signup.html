@@ -1,7 +1,10 @@
 
 {% extends 'base.html' %}
 {% load static %}
-
+{% block link %}
+{{block.super}}
+<!--      <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/dashboard.css' %}">-->
+{% endblock link %}
 {% block mystyle %}
 ul{
   list-style-type: none;

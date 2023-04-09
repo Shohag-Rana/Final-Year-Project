@@ -8,7 +8,16 @@
 {% endblock mystyle %}
     
    
-{% block title %}{{block.super}} Special Courses {% endblock title %} 
+{% block title %}{{block.super}} Special Courses {% endblock title %}
+
+
+{% block link %}
+{{block.super}}
+<!--      <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/dashboard.css' %}">-->
+{% endblock link %}
+
+
+
 
  {% block content1 %}
     <div class="container">

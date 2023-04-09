@@ -3,7 +3,16 @@
 {% load crispy_forms_tags %}
 {% load crispy_forms_filters %}  
    
-{% block title %} {{block.super}} course teacher mark {% endblock title %} 
+{% block title %} {{block.super}} course teacher mark {% endblock title %}
+
+
+{% block link %}
+{{block.super}}
+<!--      <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/dashboard.css' %}">-->
+{% endblock link %}
+
+
+
 {% block mystyle %}
   .mark-sheet{
     border: 2px solid black;

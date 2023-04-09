@@ -2,7 +2,10 @@
 {% load static %}
 
 {% block title %}{{block.super}} SignUp {% endblock title %} 
-
+{% block link %}
+{{block.super}}
+<!--      <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/dashboard.css' %}">-->
+{% endblock link %}
  {% block content1 %}
  {% if messages %}
  {% for message in messages %}

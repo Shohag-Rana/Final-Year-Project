@@ -3,6 +3,10 @@
 {% load crispy_forms_filters %}
 {% load static %}
 
+{% block link %}
+{{block.super}}
+<!--      <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/dashboard.css' %}">-->
+{% endblock link %}
     
 {% block title %}{{block.super}} | Delete Student {% endblock title %} 
 

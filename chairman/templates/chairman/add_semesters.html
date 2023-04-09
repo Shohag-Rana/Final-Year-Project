@@ -2,9 +2,10 @@
 {% load static %}
 {% load crispy_forms_tags %}
 {% load crispy_forms_filters %}
-{% block mystyle %}
- 
-{% endblock mystyle%}
+{% block link %}
+{{block.super}}
+<!--      <link rel="stylesheet" type="text/css" href="{% static 'authentication/css/dashboard.css' %}">-->
+{% endblock link %}
 {% block title %}{{block.super}} Add Courses {% endblock title %} 
 
  {% block content1 %}
